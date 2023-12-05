@@ -1,8 +1,10 @@
+import time
+
 from django.shortcuts import render, redirect
 from .models import Tenant
 from .forms import *
 import datetime
-from .src.src_pdf_utils import create_pdf
+from .src.src_pdf_utils import *
 
 
 def generate_pdfs(request):
@@ -13,7 +15,7 @@ def generate_pdfs(request):
             current_year = datetime.datetime.now().year
 
             tenants = Tenant.objects.all()
-
+            files = []
             for tenant in tenants:
                 day = tenant.dia
                 price = tenant.precio
@@ -27,7 +29,15 @@ def generate_pdfs(request):
                     f"Delegación Cuajimalpa, C.P. 05219, correspondiente al mes de {month.upper()} de {current_year}."
 
                 # Create and save the PDF (replace with your PDF creation logic)
-                create_pdf(subject, text, month, tenant.name)
+                #create_pdf(subject, text, month, tenant.name)
+
+                file_path =  create_pdf_email(subject, text, month, tenant.name)
+                files.append(file_path)
+
+            time.sleep(1)
+            send_emails(files, month)
+
+                #response = create_pdf_download(request, subject, text, month, tenant.name)
 
             return render(request, 'recibos/pdf_generated.html', {'month': month})
 
