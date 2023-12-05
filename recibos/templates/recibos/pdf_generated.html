@@ -1,0 +1,26 @@
+<!-- pdf_generated.html -->
+<html>
+<head>
+    <title>PDFs Generated</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #28a745;
+            color: #000; /* Set the text color to black */
+        }
+        .container {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">PDFs have been generated successfully for {{ month }}!</h1>
+                <a href="{% url 'generate_pdfs' %}" class="btn btn-primary">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

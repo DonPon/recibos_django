@@ -1,0 +1,37 @@
+<!-- generate_pdfs.html -->
+<html>
+<head>
+    <title>Generate PDFs</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .nav-tabs {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'update_tenants' %}">Update Tenants</a>
+            </li>
+        </ul>
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Generate PDFs</h1>
+                <form method="post" action="{% url 'generate_pdfs' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Generate PDFs</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
