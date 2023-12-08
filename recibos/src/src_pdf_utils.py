@@ -1,3 +1,5 @@
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 import fpdf
 import datetime
 #import yaml
@@ -205,7 +207,11 @@ def create_pdf_email(subject, text, month, name):
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
     # Save the document
-    pdf.output(filepath)
+    #pdf.output(filepath)
+    pdf_content = ContentFile(pdf.output(name=filename))
+
+    # Save the ContentFile using default_storage
+    default_storage.save(filepath, pdf_content)
 
     return(filepath)
 
