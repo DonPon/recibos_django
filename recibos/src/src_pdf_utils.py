@@ -208,7 +208,7 @@ def create_pdf_email(subject, text, month, name):
 
     # Save the document
     #pdf.output(filepath)
-    pdf_content = ContentFile(pdf.output(name=filepath))
+    pdf_content = ContentFile(pdf.output(name=filename))
 
     # Save the ContentFile using default_storage
     default_storage.save(filepath, pdf_content)
