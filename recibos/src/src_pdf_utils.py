@@ -10,7 +10,7 @@ from email.mime.application import MIMEApplication
 from email.mime.base import MIMEBase
 from django.http import HttpResponse
 from email import encoders
-
+from django.conf import settings
 import tempfile
 
 
@@ -201,13 +201,13 @@ def create_pdf_email(subject, text, month, name):
     # Define the filename
     filename = f"Recibo_{month.upper()}_{name}.pdf"
 
-    # Create the full filepath
-    #filepath = os.path.join(folder_path, filename)
+    # Create the full filepath using MEDIA_ROOT
+    filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
     # Save the document
-    pdf.output(filename)
+    pdf.output(filepath)
 
-    return(filename)
+    return(filepath)
 
 
 
