@@ -233,11 +233,19 @@ def send_emails(files, month):
     message['To'] = to_email
     message.attach(MIMEText(body, 'plain'))
 
-    for attachment_path in files:
-        with open(attachment_path, 'rb') as file:
-            attachment = MIMEApplication(file.read(), _subtype="pdf")
-            attachment.add_header('Content-Disposition', 'attachment', filename=attachment_path)
-            message.attach(attachment)
+    for file_path in files:
+        # Get the file content from default_storage
+        file_content = default_storage.open(file_path).read()
+
+        # Create a MIMEApplication with the file content
+        attachment = MIMEApplication(file_content, _subtype="pdf")
+
+        # Extract the filename from the file path
+        filename = file_path.split('/')[-1]  # Adjust this based on your file paths
+        attachment.add_header('Content-Disposition', 'attachment', filename=filename)
+        
+        # Attach the file to the email
+        message.attach(attachment)
 
     # Connect to the SMTP server and send the email
     smtp_server = 'smtp.gmail.com'
@@ -250,7 +258,6 @@ def send_emails(files, month):
         server.login(smtp_username, smtp_password)
         server.sendmail(from_email, to_email, message.as_string())
 
-    # Delete the file
-    for filename in files:
-        os.remove(filename)
-
+    # Delete the files
+    for file_path in files:
+        default_storage.delete(file_path)
