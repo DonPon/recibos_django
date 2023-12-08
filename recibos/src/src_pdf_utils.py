@@ -203,13 +203,15 @@ def create_pdf_email(subject, text, month, name):
     # Define the filename
     filename = f"Recibo_{month.upper()}_{name}.pdf"
 
-    # Create the full filepath using MEDIA_ROOT
-    filepath = os.path.join(settings.MEDIA_ROOT, filename)
+     filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
     # Save the document
-    #pdf.output(filepath)
-    #pdf_content = ContentFile(pdf.output(name=filename))
-    pdf_content = ContentFile(pdf.output(name=filename).encode('latin-1'))
+    with open(filepath, 'wb') as file:
+        pdf.output(file)
+
+    # Create a ContentFile for Django storage
+    with open(filepath, 'rb') as file:
+        pdf_content = ContentFile(file.read())
 
     # Save the ContentFile using default_storage
     default_storage.save(filepath, pdf_content)
