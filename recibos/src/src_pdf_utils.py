@@ -203,7 +203,7 @@ def create_pdf_email(subject, text, month, name):
     # Define the filename
     filename = f"Recibo_{month.upper()}_{name}.pdf"
 
-     filepath = os.path.join(settings.MEDIA_ROOT, filename)
+    filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
     # Save the document
     with open(filepath, 'wb') as file:
