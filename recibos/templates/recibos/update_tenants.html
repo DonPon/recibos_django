@@ -1,25 +1,54 @@
 <!-- update_tenants.html -->
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Update Tenants</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inquilinos</title>
+    <!-- Add Bootstrap CDN links here if not included in your project -->
+    <!-- For example: -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body {
+                        body {
             background-color: #f8f9fa;
         }
         .container {
             margin-top: 50px;
         }
+        .card {
+            width: 70%;
+            margin: auto;
+        }
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        label {
+            width: 30%; /* Adjust the width based on your preference */
+            font-size: 16px;
+        }
+        input {
+            width: 80%; /* Adjust the width based on your preference */
+            font-size: 16px;
+        }
+        .btn-primary {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Update Tenants</h1>
+        <h1>Inquilinos</h1>
+
+        <a href="{% url 'add_tenant' %}" class="btn btn-success mb-3">Nuevo Inquilino</a>
+
         <table class="table">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Actions</th>
+                    <th>Nombre</th>
+                    <th>Opciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,12 +56,16 @@
                     <tr>
                         <td>{{ tenant.name }}</td>
                         <td>
-                            <a href="{% url 'update_tenant' tenant_name=tenant.name %}" class="btn btn-primary">Edit</a>
+                            <a href="{% url 'update_tenant' tenant_name=tenant.name %}" class="btn btn-primary">Editar</a>
+                            <a href="{% url 'delete_tenant' tenant_name=tenant.name %}" class="btn btn-danger">Borrar</a>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary">Atras</a>
     </div>
+
 </body>
+
 </html>

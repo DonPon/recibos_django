@@ -19,16 +19,32 @@
     <div class="container">
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'update_tenants' %}">Update Tenants</a>
+                <a class="nav-link" href="{% url 'update_tenants' %}">Inquilinos</a>
             </li>
         </ul>
         <div class="card">
             <div class="card-body">
-                <h1 class="card-title">Generate PDFs</h1>
+                <h1 class="card-title">Generador de Recibos</h1>
                 <form method="post" action="{% url 'generate_pdfs' %}">
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Generate PDFs</button>
+                    <div class="form-group">
+                        <label for="monthSelect">Por favor selecciona el mes y da click en "Generar Recibos":</label>
+                        <select class="form-control" id="monthSelect" name="month">
+                            <option value="enero">enero</option>
+                            <option value="febrero">febrero</option>
+                            <option value="marzo">marzo</option>
+                            <option value="abril">abril</option>
+                            <option value="mayo">mayo</option>
+                            <option value="junio">junio</option>
+                            <option value="julio">julio</option>
+                            <option value="agosto">agosto</option>
+                            <option value="septiembre">septiembre</option>
+                            <option value="octubre">octubre</option>
+                            <option value="noviembre">noviembre</option>
+                            <option value="diciembre">diciembre</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generar Recibos</button>
                 </form>
             </div>
         </div>

@@ -1,6 +1,6 @@
 import time
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Tenant
 from .forms import *
 import datetime
@@ -73,3 +73,23 @@ def update_tenants(request, tenant_name=None):
 def update_success(request):
     return render(request, 'recibos/update_success.html')
 
+def add_tenant(request):
+    if request.method == 'POST':
+        form = TenantForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('update_tenants')  # Redirect to the same page after adding a tenant
+    else:
+        form = TenantForm()
+
+    return render(request, 'recibos/add_tenant.html', {'form': form})
+
+
+def delete_tenant(request, tenant_name):
+    tenant = get_object_or_404(Tenant, name=tenant_name)
+
+    if request.method == 'POST':
+        tenant.delete()
+        return redirect('generate_pdfs')  # Redirect to the home page or another appropriate page
+
+    return render(request, 'recibos/delete_tenant.html', {'tenant': tenant})

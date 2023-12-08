@@ -1,17 +1,35 @@
 <!-- update_tenant.html -->
 <html>
 <head>
-    <title>Update Tenant</title>
+    <title>Actualizar</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body {
+                body {
             background-color: #f8f9fa;
         }
         .container {
             margin-top: 50px;
         }
         .card {
-            margin-top: 20px;
+            width: 70%;
+            margin: auto;
+        }
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        label {
+            width: 30%; /* Adjust the width based on your preference */
+            font-size: 16px;
+        }
+        input {
+            width: 80%; /* Adjust the width based on your preference */
+            font-size: 16px;
+        }
+        .btn-primary {
+            font-size: 16px;
         }
     </style>
 </head>
@@ -19,13 +37,13 @@
     <div class="container">
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <h1 class="card-title">Update Tenant: {{ editing_tenant.name }}</h1>
+                <h1 class="card-title">{{ editing_tenant.name }}</h1>
             </div>
             <div class="card-body">
                 <form method="post" action="{% url 'update_tenant' tenant_name=editing_tenant.name %}">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="{{ form.name.id_for_label }}">Name:</label>
+                        <label for="{{ form.name.id_for_label }}">Nombre:</label>
                         {{ form.name }}
                     </div>
                     <div class="form-group">
@@ -48,8 +66,10 @@
                         <label for="{{ form.local.id_for_label }}">Local:</label>
                         {{ form.local }}
                     </div>
-                    <button type="submit" class="btn btn-primary">Update Tenant</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+
                 </form>
+                <a href="{% url 'update_tenants' %}" class="btn btn-secondary">Atras</a>
             </div>
         </div>
     </div>
