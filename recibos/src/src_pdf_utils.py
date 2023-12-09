@@ -1,5 +1,6 @@
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.core.files import File
 import fpdf
 import datetime
 #import yaml
