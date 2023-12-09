@@ -145,7 +145,9 @@ def create_pdf_download(request, subject, text, month, name):
     # Delete the file
     #os.remove(filename)
 
-    return filenamedef create_pdf_email(subject, text, month, name):
+    return filename
+
+def create_pdf_email(subject, text, month, name):
     # Create a new PDF document.
     pdf = fpdf.FPDF(format='Letter')
 
