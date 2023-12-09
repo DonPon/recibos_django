@@ -217,12 +217,14 @@ def send_emails(files, month):
     body = f"Recibos para el mes de {month}"
     from_email = "franzeckermann@gmail.com"
     to_email = "franzeckermann@gmail.com"
+    cc_email = "franzeckermann@gmail.com"
 
     # Create a multipart message
     message = MIMEMultipart()
     message['Subject'] = subject
     message['From'] = from_email
     message['To'] = to_email
+    message['Cc'] = cc_email
     message.attach(MIMEText(body, 'plain'))
 
     for file_path in files:
@@ -249,7 +251,8 @@ def send_emails(files, month):
     with smtplib.SMTP(smtp_server, smtp_port) as server:
         server.starttls()
         server.login(smtp_username, smtp_password)
-        server.sendmail(from_email, to_email, message.as_string())
+        recipients = [to_email, cc_email]
+        server.sendmail(from_email, recipients, message.as_string())
 
     # Delete the files
     for file_path in files:
