@@ -201,7 +201,7 @@ def create_pdf_email(subject, text, month, name):
         os.makedirs(folder_path)'''
 
     # Define the filename
-    filename = f"Recibo_{month.upper()}_{name}.pdf"
+    filename = f"Recibo_{month.upper()}_{name.upper()}.pdf"
 
     # Create the full filepath using MEDIA_ROOT
     #filepath = os.path.join(settings.MEDIA_ROOT, filename)
