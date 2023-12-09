@@ -1,7 +1,9 @@
 <!-- generate_pdfs.html -->
-<html>
+<html lang="es">
 <head>
-    <title>Generate PDFs</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Recibos</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
@@ -10,16 +12,57 @@
         .container {
             margin-top: 50px;
         }
-        .nav-tabs {
-            margin-bottom: 15px;
+        .nav-link-inquilinos {
+            font-size: 20px; /* Adjust the font size based on your preference */
+            padding: 15px 20px; /* Adjust the padding based on your preference */
+        }
+        .card {
+            width: 80%; /* Adjust the width based on your preference */
+            max-width: 400px; /* Set a maximum width for smaller screens */
+            margin: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .line {
+            width: 100%;
+            height: 0.5px; /* Adjust the height for narrower lines */
+            background-color: #ced4da; /* Adjust the line color based on your preference */
+            margin: 0;
+            padding: 0;
+        }
+        .card-body {
+            text-align: center;
+        }
+        .card-title {
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 5px;
+            display: block;
+            text-align: left;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .btn-primary {
+            font-size: 18px;
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="line"></div>
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'update_tenants' %}">Inquilinos</a>
+                <a class="nav-link nav-link-inquilinos" href="{% url 'update_tenants' %}">Inquilinos</a>
             </li>
         </ul>
         <div class="card">
@@ -28,20 +71,20 @@
                 <form method="post" action="{% url 'generate_pdfs' %}">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="monthSelect">Por favor selecciona el mes y da click en "Generar Recibos":</label>
+                        <label for="monthSelect">Selecciona el mes:</label>
                         <select class="form-control" id="monthSelect" name="month">
-                            <option value="enero">enero</option>
-                            <option value="febrero">febrero</option>
-                            <option value="marzo">marzo</option>
-                            <option value="abril">abril</option>
-                            <option value="mayo">mayo</option>
-                            <option value="junio">junio</option>
-                            <option value="julio">julio</option>
-                            <option value="agosto">agosto</option>
-                            <option value="septiembre">septiembre</option>
-                            <option value="octubre">octubre</option>
-                            <option value="noviembre">noviembre</option>
-                            <option value="diciembre">diciembre</option>
+                            <option value="enero">Enero</option>
+                            <option value="febrero">Febrero</option>
+                            <option value="marzo">Marzo</option>
+                            <option value="abril">Abril</option>
+                            <option value="mayo">Mayo</option>
+                            <option value="junio">Junio</option>
+                            <option value="julio">Julio</option>
+                            <option value="agosto">Agosto</option>
+                            <option value="septiembre">Septiembre</option>
+                            <option value="octubre">Octubre</option>
+                            <option value="noviembre">Noviembre</option>
+                            <option value="diciembre">Diciembre</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Generar Recibos</button>

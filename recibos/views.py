@@ -23,7 +23,7 @@ def generate_pdfs(request):
                 servicios = tenant.servicios
                 local = tenant.local
 
-                subject = f"CDMX, a {day} de {month}\nde {current_year}"
+                subject = f"CDMX, a {day} de {month.lower()}\nde {current_year}"
                 text = f"Recibí de parte del SR. {(tenant.name).upper()}, la cantidad de ${price} ({price_letters.upper()} PESOS 00/100 M.N.), " \
                     f"por concepto de {servicios.lower()} del local {local}, del inmueble ubicado en Calle Noche de Paz # 14 Colonia Granjas Navidad, " \
                     f"Delegación Cuajimalpa, C.P. 05219, correspondiente al mes de {month.upper()} de {current_year}."

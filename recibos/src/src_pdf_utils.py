@@ -213,7 +213,7 @@ def create_pdf_email(subject, text, month, name):
 
 def send_emails(files, month):
     # Compose the email
-    subject = f"Recibos_{month.upper()}"
+    subject = f"Recibos {month.upper()}"
     body = f"Recibos para el mes de {month}"
     from_email = "franzeckermann@gmail.com"
     to_email = "franzeckermann@gmail.com"
