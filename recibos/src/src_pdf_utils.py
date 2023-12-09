@@ -210,7 +210,7 @@ def create_pdf_email(subject, text, month, name):
     pdf_content = ContentFile(pdf.output(name=filepath).encode('latin-1'))
 
     # Save the ContentFile using default_storage
-    #default_storage.save(filepath, pdf_content)
+    default_storage.save(filepath, pdf_content)
 
     return filepath
 
