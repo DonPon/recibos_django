@@ -208,17 +208,15 @@ def create_pdf_email(request, subject, text, month, name):
 
     # Save the document
     pdf_content = ContentFile(pdf.output(name=filename).encode('latin-1'))
+    full_path = os.path.abspath(filename)
 
 
     # Save the ContentFile using default_storage
-    #default_storage.save(filepath, pdf_content)
+    default_storage.save(filepath, pdf_content)
 
-    with open(filename, 'rb') as file:
-        # Create an HttpResponse with the file's content for download
-        response = HttpResponse(file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename={filename}'
-    return response
-    #return filename
+
+
+    return full_path
 
 
 

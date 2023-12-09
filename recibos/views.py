@@ -31,15 +31,14 @@ def generate_pdfs(request):
                 # Create and save the PDF (replace with your PDF creation logic)
                 #create_pdf(subject, text, month, tenant.name)
 
-                #file_path =  create_pdf_email(subject, text, month, tenant.name)
-                #files.append(file_path)
-                response = create_pdf_download(request, subject, text, month, tenant.name)
-                return response
+                file_path =  create_pdf_email(subject, text, month, tenant.name)
+                files.append(file_path)
+
             time.sleep(1)
             #send_emails(files, month)
 
 
-
+                #response = create_pdf_download(request, subject, text, month, tenant.name)
 
             return render(request, 'recibos/pdf_generated.html', {'month': month})
 
