@@ -212,7 +212,7 @@ def create_pdf_email(subject, text, month, name):
     # Save the ContentFile using default_storage
     default_storage.save(filepath, pdf_content)
 
-    return filepath
+    return filename
 
 
 
