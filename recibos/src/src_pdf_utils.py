@@ -144,10 +144,7 @@ def create_pdf_download(request, subject, text, month, name):
     # Delete the file
     #os.remove(filename)
 
-    return filename
-
-
-def create_pdf_email(subject, text, month, name):
+    return filenamedef create_pdf_email(subject, text, month, name):
     # Create a new PDF document.
     pdf = fpdf.FPDF(format='Letter')
 
@@ -206,17 +203,13 @@ def create_pdf_email(subject, text, month, name):
     # Create the full filepath using MEDIA_ROOT
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
-    # Save the document
-    pdf_content = ContentFile(pdf.output(name=filename).encode('latin-1'))
-    full_path = os.path.abspath(filename)
-
-
-    # Save the ContentFile using default_storage
-    default_storage.save(filepath, pdf_content)
+    with open(filepath, 'wb') as f:
+        django_file = File(f)
+        django_file.write(pdf.output(name=filename).encode('latin-1'))
 
 
 
-    return full_path
+    return filepath
 
 
 
