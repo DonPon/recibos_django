@@ -255,6 +255,9 @@ def send_emails(files, month):
     for file_path in files:
         default_storage.delete(file_path)
 
+    for file_path_2 in files:
+        default_storage.delete(file_path)
+
 def create_pdf_reportlab(subject, text, month, name):
     from django.http import FileResponse
     from io import BytesIO
