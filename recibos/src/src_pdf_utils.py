@@ -147,7 +147,7 @@ def create_pdf_download(request, subject, text, month, name):
     return filename
 
 
-def create_pdf_email(subject, text, month, name):
+def create_pdf_email(request, subject, text, month, name):
     # Create a new PDF document.
     pdf = fpdf.FPDF(format='Letter')
 
@@ -209,10 +209,16 @@ def create_pdf_email(subject, text, month, name):
     # Save the document
     pdf_content = ContentFile(pdf.output(name=filename).encode('latin-1'))
 
-    # Save the ContentFile using default_storage
-    default_storage.save(filepath, pdf_content)
 
-    return filename
+    # Save the ContentFile using default_storage
+    #default_storage.save(filepath, pdf_content)
+
+    with open(filename, 'rb') as file:
+        # Create an HttpResponse with the file's content for download
+        response = HttpResponse(file.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+    return response
+    #return filename
 
 
 
