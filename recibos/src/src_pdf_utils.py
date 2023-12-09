@@ -207,10 +207,10 @@ def create_pdf_email(subject, text, month, name):
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
     # Save the document
-    pdf_content = ContentFile(pdf.output(name=filepath).encode('latin-1'))
+    pdf_content = ContentFile(pdf.output(name=filename).encode('latin-1'))
 
     # Save the ContentFile using default_storage
-    default_storage.save(filepath, pdf_content)
+    default_storage.save(filepath, filename)
 
     return filepath
 
