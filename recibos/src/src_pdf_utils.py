@@ -147,7 +147,7 @@ def create_pdf_download(request, subject, text, month, name):
     return filename
 
 
-def create_pdf_email(request, subject, text, month, name):
+def create_pdf_email(subject, text, month, name):
     # Create a new PDF document.
     pdf = fpdf.FPDF(format='Letter')
 
