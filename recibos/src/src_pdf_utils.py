@@ -13,7 +13,7 @@ from email.mime.base import MIMEBase
 from django.http import HttpResponse
 from email import encoders
 from django.conf import settings
-import tempfile
+import io
 
 
 def create_pdf(subject, text, month, name):
@@ -203,24 +203,18 @@ def create_pdf_email(subject, text, month, name):
     # Define the filename
     filename = f"Recibo_{month.upper()}_{name}.pdf"
 
+    # Create the full filepath using MEDIA_ROOT
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
     # Save the document
-    with open(filepath, 'wb') as file:
-        pdf.output(file)
-
-    # Create a ContentFile for Django storage
-    with open(filepath, 'rb') as file:
-        pdf_content = ContentFile(file.read())
+    pdf_content = ContentFile(pdf.output(name=filepath).encode('latin-1'))
 
     # Save the ContentFile using default_storage
-    default_storage.save(filepath, pdf_content)
+    #default_storage.save(filepath, pdf_content)
 
-    return(filepath)
+    return filepath
 
 
-
-    #return HttpResponse("Email sent successfully!")
 
 def send_emails(files, month):
     # Compose the email

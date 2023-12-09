@@ -34,6 +34,7 @@ def generate_pdfs(request):
                 file_path =  create_pdf_email(subject, text, month, tenant.name)
                 files.append(file_path)
 
+
             time.sleep(1)
             send_emails(files, month)
 
