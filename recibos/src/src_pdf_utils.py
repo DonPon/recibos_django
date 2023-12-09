@@ -148,65 +148,71 @@ def create_pdf_download(request, subject, text, month, name):
 
 
 def create_pdf_email(subject, text, month, name):
-    # Create a new PDF document in memory.
-    with io.BytesIO() as buf:
-        pdf = fpdf.FPDF(format='Letter')
+    # Create a new PDF document.
+    pdf = fpdf.FPDF(format='Letter')
 
-        # Set slightly larger margins
-        pdf.set_margins(left=30, top=30, right=30)
+    # Set slightly larger margins
+    pdf.set_margins(left=30, top=30, right=30)
 
-        # Add a new page.
-        pdf.add_page()
+    # Add a new page.
+    pdf.add_page()
 
-        # Set font for title
-        pdf.set_font('Arial', 'B', 20)
+    # Set font for title
+    pdf.set_font('Arial', 'B', 20)
 
-        # Add the title text
-        pdf.cell(0, 8, 'RECIBO', align='C')
+    # Add the title text
+    pdf.cell(0, 8, 'RECIBO', align='C')
 
-        # Add a newline
-        pdf.ln(20)
+    # Add a newline
+    pdf.ln(20)
 
-        # Reset font for body text
-        pdf.set_font('Arial', '', 14)
+    # Reset font for body text
+    pdf.set_font('Arial', '', 14)
 
-        # Add the subject text
-        pdf.multi_cell(0, 8, subject, align='R')
+    # Add the subject text
+    pdf.multi_cell(0, 8, subject, align='R')
 
-        # Add a newline
-        pdf.ln(20)
+    # Add a newline
+    pdf.ln(20)
 
-        # Add the body text
-        pdf.multi_cell(0, 8, text, align='J')
+    # Add the body text
+    pdf.multi_cell(0, 8, text, align='J')
 
-        # Add 5 new lines
-        for i in range(7):
-            pdf.ln(8)
+    # Add 5 new lines
+    for i in range(7):
+        pdf.ln(8)
 
-        # Draw a signature line
-        pdf.set_line_width(0.4)
-        pdf.line(pdf.get_x() + 35, pdf.get_y(), pdf.get_x() + 120, pdf.get_y())
+    # Draw a signature line
+    pdf.set_line_width(0.4)
+    pdf.line(pdf.get_x() + 35, pdf.get_y(), pdf.get_x() + 120, pdf.get_y())
 
-        # Add a newline
-        pdf.ln(1)
+    # Add a newline
+    pdf.ln(1)
 
-        # Add signature text
-        pdf.set_font('Arial', '', 14)
-        pdf.multi_cell(0, 8, f'SRA. GABRIELA SEGURA\nLEYVA', align='C')
+    # Add signature text
+    pdf.set_font('Arial', '', 14)
+    pdf.multi_cell(0, 8, f'SRA. GABRIELA SEGURA\nLEYVA', align='C')
 
-        # Define the filename
-        filename = f"Recibo_{month.upper()}_{name}.pdf"
+    # Specify the folder path
+    '''folder_path = "C:/Users/4PF26LA_RS5/Desktop/Recibos/"
 
-        # Output the PDF to the buffer.
-        pdf.output(buf, 'F')
+    # Create the folder if it doesn't exist
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)'''
 
-        # Get the buffer's content.
-        pdf_content = buf.getvalue()
+    # Define the filename
+    filename = f"Recibo_{month.upper()}_{name}.pdf"
 
-    # Create a ContentFile with the PDF content.
-    pdf_file = ContentFile(pdf_content, filename)
+    # Create the full filepath using MEDIA_ROOT
+    filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
-    return pdf_file
+    # Save the document
+    pdf_content = ContentFile(pdf.output(name=filename).encode('latin-1'))
+
+    # Save the ContentFile using default_storage
+    default_storage.save(filepath, pdf_content)
+
+    return filepath
 
 
 
