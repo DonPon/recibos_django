@@ -204,15 +204,10 @@ def create_pdf_email(subject, text, month, name):
     filename = f"Recibo_{month.upper()}_{name}.pdf"
 
     # Create the full filepath using MEDIA_ROOT
-    filepath = os.path.join(settings.MEDIA_ROOT, filename)
+    #filepath = os.path.join(settings.MEDIA_ROOT, filename)
+    pdf_content = ContentFile(pdf.output(name=filename).encode('latin-1'))
 
-    with open(filepath, 'wb') as f:
-        django_file = File(f)
-        django_file.write(pdf.output(name=filename).encode('latin-1'))
-
-
-
-    return filepath
+    return filename
 
 
 
@@ -231,8 +226,9 @@ def send_emails(files, month):
     message.attach(MIMEText(body, 'plain'))
 
     for file_path in files:
-        # Get the file content from default_storage
-        file_content = default_storage.open(file_path).read()
+
+        with open(file_path, 'rb') as f:
+            file_content = f.read()
 
         # Create a MIMEApplication with the file content
         attachment = MIMEApplication(file_content, _subtype="pdf")
@@ -258,3 +254,56 @@ def send_emails(files, month):
     # Delete the files
     for file_path in files:
         default_storage.delete(file_path)
+
+def create_pdf_reportlab(subject, text, month, name):
+    from django.http import FileResponse
+    from io import BytesIO
+    from reportlab.pdfgen import canvas
+    # Create a file-like buffer to receive PDF data.
+    buffer = BytesIO()
+
+    # Create the PDF object, using the buffer as its "file."
+    p = canvas.Canvas(buffer)
+
+    # Set slightly larger margins
+    # Load the font file from the default storage
+
+
+    p.setFont('B', 20)
+    p.drawString(20, 75, 'RECIBO')
+    p.ln(20)
+
+
+    p.setFont('', 14)
+    p.drawString(200, 200, subject)
+    p.ln(20)
+
+    p.drawString(20, 325, text)
+
+    # Add 5 new lines
+    for i in range(7):
+        p.ln(8)
+
+    # Draw a signature line
+    p.setLineWidth(0.4)
+    p.line(150, 470, 550, 470)
+
+    # Add a newline
+    p.ln(1)
+
+    # Add signature text
+    p.setFont('', 14)
+    p.drawString(350, 490, f'SRA. GABRIELA SEGURA\nLEYVA')
+
+    # Define the filename
+    filename = f"Recibo_{month.upper()}_{name}.pdf"
+
+    # Save the PDF file to the buffer.
+    p.showPage()
+    p.save()
+
+    # Close the PDF object cleanly, and we're done.
+    buffer.seek(0)
+
+    # Create the FileResponse object.
+    return FileResponse(buffer, as_attachment=True, filename=filename)
