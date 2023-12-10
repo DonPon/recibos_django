@@ -313,3 +313,8 @@ def create_pdf_reportlab(subject, text, month, name):
 
     # Create the FileResponse object.
     return FileResponse(buffer, as_attachment=True, filename=filename)
+
+
+#tenant1 = Tenant(name='JOSE ANTONIO HURTADO LOPEZ', dia='01', precio='6,580.00', precio_en_letra='SEIS MIL QUINIENTOS OCHENTA', servicios='renta y mantenimiento', local='26-C')
+#tenant2 = Tenant(name='IRWING ARTURO PEÑA VARGAS', dia='15', precio='10,500.00', precio_en_letra='DIEZ MIL QUINIENTOS', servicios='renta', local='5-B')
+#tenant3 = Tenant(name='FRANCISCO SANCHEZ GALEANA', dia='15', precio='7,505.00', precio_en_letra='SIETE MIL QUINIENTOS CINCO', servicios='renta, mantenimiento, agua y luz', local='26')

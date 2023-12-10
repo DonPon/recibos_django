@@ -84,11 +84,14 @@ WSGI_APPLICATION = 'recibos_django.wsgi.application'
 }"""
 import dj_database_url
 DATABASES = {
-    'default': dj_database_url.parse('postgres://productiondatabase_efvp_user:TkHJqJvutRgI0sWdmxRyt4TJ9Ca5gs9T@dpg-clnl3bde89qs739hpva0-a.frankfurt-postgres.render.com/productiondatabase_efvp')
+    'default': dj_database_url.parse('postgres://hgokxebu:95LRot5Dn-p3hUI2NWYQjJH_t4x3lnOS@flora.db.elephantsql.com/hgokxebu')
 }
+# PostgreSQL from render.com:
+# postgres://productiondatabase_efvp_user:TkHJqJvutRgI0sWdmxRyt4TJ9Ca5gs9T@dpg-clnl3bde89qs739hpva0-a.frankfurt-postgres.render.com/productiondatabase_efvp
 
-# postgres://productiondatabase_efvp_user:TkHJqJvutRgI0sWdmxRyt4TJ9Ca5gs9T@dpg-clnl3bde89qs739hpva0-a.frankfurt-postgres.render.com/productiondatabase_efvp
-# postgres://productiondatabase_efvp_user:TkHJqJvutRgI0sWdmxRyt4TJ9Ca5gs9T@dpg-clnl3bde89qs739hpva0-a.frankfurt-postgres.render.com/productiondatabase_efvp
+# PostrgreSQL from elephant free:
+# postgres://hgokxebu:95LRot5Dn-p3hUI2NWYQjJH_t4x3lnOS@flora.db.elephantsql.com/hgokxebu
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
