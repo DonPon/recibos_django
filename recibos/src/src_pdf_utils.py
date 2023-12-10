@@ -216,7 +216,7 @@ def send_emails(files, month):
     subject = f"Recibos {month.upper()}"
     body = f"Recibos para el mes de {month}"
     from_email = "franzeckermann@gmail.com"
-    to_email = "franzeckermann@gmail.com"
+    to_email = "gabysurel@yahoo.com.mx"
     cc_email = "franzeckermann@gmail.com"
 
     # Create a multipart message
