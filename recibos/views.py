@@ -60,8 +60,20 @@ def update_tenants(request, tenant_name=None):
             if form.is_valid():
                 # Save the changes
                 form.save()
+                if not '.00' in tenant.precio:
+                    tenant.precio = f'{tenant.precio}.00'
+
                 return redirect('update_success')  # Redirect to a success page
         else:
+            # Transform data before rendering the form
+            tenant.name = tenant.name.upper()
+            tenant.precio_en_letra = tenant.precio_en_letra.upper()
+            tenant.servicios = tenant.servicios.lower()
+            if 'PESOS' in tenant.precio_en_letra:
+                tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')
+            if not '.00' in tenant.precio:
+                tenant.precio = f'{tenant.precio}.00'
+
             form = TenantForm(instance=tenant)
 
         return render(request, 'recibos/update_tenant.html', {'form': form, 'editing_tenant': tenant})
@@ -77,8 +89,31 @@ def update_success(request):
 def add_tenant(request):
     if request.method == 'POST':
         form = TenantForm(request.POST)
+
         if form.is_valid():
-            form.save()
+            # Transform data before saving
+            name = form.cleaned_data['name'].upper()
+            precio_en_letra = form.cleaned_data['precio_en_letra'].upper()
+            servicios = form.cleaned_data['servicios'].lower()
+            local = form.cleaned_data['local']
+            dia = form.cleaned_data['dia']
+            precio = form.cleaned_data['precio']
+
+            if 'PESOS' in precio_en_letra:
+                precio_en_letra = precio_en_letra.replace('PESOS', '')
+            # Create a new instance of your model and set the fields
+            new_tenant = Tenant(
+                name=name,
+                precio_en_letra=precio_en_letra,
+                servicios=servicios,
+                dia=dia,
+                precio=precio,
+                local=local
+                # Add other fields as needed
+            )
+
+            # Save the new instance
+            new_tenant.save()
             return redirect('update_tenants')  # Redirect to the same page after adding a tenant
     else:
         form = TenantForm()
