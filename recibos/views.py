@@ -62,6 +62,12 @@ def update_tenants(request, tenant_name=None):
                 form.save()
                 if not '.00' in tenant.precio:
                     tenant.precio = f'{tenant.precio}.00'
+                tenant.precio_en_letra = tenant.precio_en_letra.upper()
+                tenant.servicios = tenant.servicios.lower()
+                if 'PESOS' in tenant.precio_en_letra:
+                    tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')
+
+                tenant.save()
 
                 return redirect('update_success')  # Redirect to a success page
         else:
@@ -73,6 +79,8 @@ def update_tenants(request, tenant_name=None):
                 tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')
             if not '.00' in tenant.precio:
                 tenant.precio = f'{tenant.precio}.00'
+
+            tenant.save()
 
             form = TenantForm(instance=tenant)
 
@@ -101,6 +109,9 @@ def add_tenant(request):
 
             if 'PESOS' in precio_en_letra:
                 precio_en_letra = precio_en_letra.replace('PESOS', '')
+
+            if not '.00' in precio:
+                precio = f'{precio}.00'
             # Create a new instance of your model and set the fields
             new_tenant = Tenant(
                 name=name,
