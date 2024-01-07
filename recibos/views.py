@@ -60,8 +60,15 @@ def update_tenants(request, tenant_name=None):
             if form.is_valid():
                 # Save the changes
                 form.save()
-                if not '.00' in tenant.precio:
-                    tenant.precio = f'{tenant.precio}.00'
+
+
+                if not ',' in tenant.precio:
+                    tenant.precio = "{:,.2f}".format(float(tenant.precio))
+
+                elif ',' in tenant.precio:
+                    precio_temp = tenant.precio
+                    tenant.precio = "{:,.2f}".format(float(precio_temp.replace(',','')))
+
                 tenant.precio_en_letra = tenant.precio_en_letra.upper()
                 tenant.servicios = tenant.servicios.lower()
                 if 'PESOS' in tenant.precio_en_letra:
@@ -72,15 +79,16 @@ def update_tenants(request, tenant_name=None):
                 return redirect('update_success')  # Redirect to a success page
         else:
             # Transform data before rendering the form
-            tenant.name = tenant.name.upper()
-            tenant.precio_en_letra = tenant.precio_en_letra.upper()
-            tenant.servicios = tenant.servicios.lower()
-            if 'PESOS' in tenant.precio_en_letra:
-                tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')
-            if not '.00' in tenant.precio:
-                tenant.precio = f'{tenant.precio}.00'
+            # tenant.name = tenant.name.upper()
+            # tenant.precio_en_letra = tenant.precio_en_letra.upper()
+            # tenant.servicios = tenant.servicios.lower()
+            # if 'PESOS' in tenant.precio_en_letra:
+            #    tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')
 
-            tenant.save()
+            # if not '.00' in tenant.precio:
+            #     tenant.precio = f'{tenant.precio}.00'
+
+            # tenant.save()
 
             form = TenantForm(instance=tenant)
 
@@ -110,8 +118,10 @@ def add_tenant(request):
             if 'PESOS' in precio_en_letra:
                 precio_en_letra = precio_en_letra.replace('PESOS', '')
 
-            if not '.00' in precio:
-                precio = f'{precio}.00'
+
+            precio = "{:,.2f}".format(float(precio.replace(',','')))
+
+
             # Create a new instance of your model and set the fields
             new_tenant = Tenant(
                 name=name,
@@ -140,3 +150,4 @@ def delete_tenant(request, tenant_name):
         return redirect('generate_pdfs')  # Redirect to the home page or another appropriate page
 
     return render(request, 'recibos/delete_tenant.html', {'tenant': tenant})
+
