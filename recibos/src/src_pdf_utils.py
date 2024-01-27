@@ -215,7 +215,7 @@ def send_emails(files, month):
     # Compose the email
     subject = f"Recibos {month.upper()}"
     body = f"Recibos para el mes de {month}"
-    from_email = "franzeckermann@gmail.com"
+    from_email = "projects.franz@gmail.com"
     to_email = "gabysurel@yahoo.com.mx"
     cc_email = "franzeckermann@gmail.com"
 
@@ -245,8 +245,9 @@ def send_emails(files, month):
     # Connect to the SMTP server and send the email
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
-    smtp_username = 'franzeckermann@gmail.com'
-    smtp_password = 'emak djiq houm atdb'
+    smtp_username = 'projects.franz@gmail.com'
+    smtp_password = 'ugcx uano rucc rdko'
+
 
     with smtplib.SMTP(smtp_server, smtp_port) as server:
         server.starttls()
