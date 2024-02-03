@@ -7,33 +7,36 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f3f4f6; /* Light grayish-blue background */
         }
         .container {
             margin-top: 50px;
         }
         .nav-link-inquilinos {
-            font-size: 20px; /* Adjust the font size based on your preference */
-            padding: 15px 20px; /* Adjust the padding based on your preference */
+            font-size: 20px;
+            padding: 15px 20px;
         }
         .card {
-            width: 80%; /* Adjust the width based on your preference */
-            max-width: 400px; /* Set a maximum width for smaller screens */
+            width: 100%;
             margin: auto;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 8px;
         }
         .line {
             width: 100%;
-            height: 0.5px; /* Adjust the height for narrower lines */
-            background-color: #ced4da; /* Adjust the line color based on your preference */
+            height: 0.5px;
+            background-color: #ced4da;
             margin: 0;
             padding: 0;
         }
         .card-body {
             text-align: center;
+            padding: 20px;
         }
         .card-title {
             font-size: 24px;
+            margin-bottom: 20px;
         }
         .form-group {
             margin-bottom: 20px;
@@ -87,7 +90,7 @@
                             <option value="diciembre">Diciembre</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Generar Recibos</button>
+                    <button type="submit" class="btn btn-primary btn-block">Generar Recibos</button>
                 </form>
             </div>
         </div>
