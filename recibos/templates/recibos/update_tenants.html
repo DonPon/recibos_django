@@ -10,55 +10,59 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #e9ecef; /* Light gray background for contrast */
+            background-color: #edeef0; /* Slightly off-white background */
         }
         .container {
             margin-top: 50px;
         }
         .card {
             width: 100%;
-            margin-bottom: 40px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
-            border: 1px solid #adb5bd; /* Darker border color for visibility */
+            border: 1px solid #9ea3a5; /* Subtle border color */
             border-radius: 8px;
         }
         .card:hover {
             transform: scale(1.02);
         }
         .card-header {
-            background-color: #3f588da8;
-            color: #fff;
+            background-color: #ffffff; /* Dark teal background for contrast */
+            color: #8a8a8a;
             font-size: 18px;
         }
         .card-body {
             padding: 20px;
         }
         .form-group {
-            margin-bottom: 60px;
+            margin-bottom: 20px;
         }
         label {
             font-size: 16px;
+            color: #455a64; /* Dark gray text color */
         }
         input {
             width: 100%;
             font-size: 16px;
         }
         .btn {
-            font-size: 12px;
+            font-size: 14px;
             border-radius: 5px;
+            margin-top: 10px; /* Adjusted margin for better spacing */
         }
         /* Increase the contrast of secondary button */
         .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
+            background-color: #546e7a; /* Slightly darker teal */
+            border-color: #546e7a;
+            color: #fff; /* White text color */
+            margin-top: 10px; /* Adjusted margin for better spacing */
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="mb-4">Inquilinos</h1>
-        <a href="{% url 'add_tenant' %}" class="btn btn-success mb-3">Nuevo Inquilino</a>
+        <a href="{% url 'add_tenant' %}" class="btn btn-success btn-block mb-3">Nuevo Inquilino</a>
 
         {% for tenant in tenants %}
             <div class="card">
@@ -69,17 +73,16 @@
                     <div class="row">
                         <div class="col-md-6"></div>
                         <div class="col-md-6">
-                            <a href="{% url 'update_tenant' tenant_name=tenant.name %}" class="btn btn-primary btn-block float-right">Editar</a>
-                            <a href="{% url 'delete_tenant' tenant_name=tenant.name %}" class="btn btn-danger btn-block float-right mt-2">Borrar</a>
+                            <a href="{% url 'update_tenant' tenant_name=tenant.name %}" class="btn btn-primary btn-block">Editar</a>
+                            <a href="{% url 'delete_tenant' tenant_name=tenant.name %}" class="btn btn-outline-danger btn-block mt-2">Borrar</a>
                         </div>
                     </div>
                 </div>
             </div>
         {% endfor %}
 
-        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary float-right">Atrás</a>
+        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary btn-block mt-3">Atrás</a>
     </div>
 
 </body>
 </html>
-
