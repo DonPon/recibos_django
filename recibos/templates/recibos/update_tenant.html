@@ -7,28 +7,33 @@
     <title>Actualizar</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-                        body {
-            background-color: #f8f9fa;
+        body {
+            background-color: #f3f4f6; /* Light grayish-blue background */
         }
         .container {
             margin-top: 50px;
         }
         .card {
-            width: 70%;
+            width: 100%;
             margin: auto;
         }
-        .form {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .card-header {
+            background-color: #3498db; /* Blue header color */
+            color: #fff;
+            font-size: 18px;
+        }
+        .card-body {
+            background-color: #fff; /* White card body */
+            padding: 20px;
+        }
+        .form-group {
             margin-bottom: 15px;
         }
         label {
-            width: 30%; /* Adjust the width based on your preference */
             font-size: 16px;
         }
         input {
-            width: 80%; /* Adjust the width based on your preference */
+            width: 100%;
             font-size: 16px;
         }
         .btn-primary {
@@ -38,43 +43,40 @@
 </head>
 <body>
     <div class="container">
-        <!--div class="card"-->
-            <div class="card-header bg-primary text-white">
+        <div class="card">
+            <div class="card-header">
                 <h1 class="card-title">{{ editing_tenant.name }}</h1>
             </div>
             <div class="card-body">
                 <form method="post" action="{% url 'update_tenant' tenant_name=editing_tenant.name %}">
                     {% csrf_token %}
-                    <div class="form">
-                        <p for="{{ form.name.id_for_label }}">Nombre:</p>
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}">Nombre:</label>
                         {{ form.name }}
                     </div>
-                    <div class="form">
-                        <p for="{{ form.dia.id_for_label }}">Dia:</p>
+                    <div class="form-group">
+                        <label for="{{ form.dia.id_for_label }}">Dia:</label>
                         {{ form.dia }}
                     </div>
-                    <div class="form">
-                        <p for="{{ form.precio.id_for_label }}">Precio:</p>
+                    <div class="form-group">
+                        <label for="{{ form.precio.id_for_label }}">Precio:</label>
                         {{ form.precio }}
                     </div>
-                    <div class="form">
-                        <p for="{{ form.precio_en_letra.id_for_label }}">Precio en Letra:</p>
+                    <div class="form-group">
+                        <label for="{{ form.precio_en_letra.id_for_label }}">Precio en Letra:</label>
                         {{ form.precio_en_letra }}
                     </div>
-                    <div class="form">
-                        <p for="{{ form.servicios.id_for_label }}">Servicios:</p>
+                    <div class="form-group">
+                        <label for="{{ form.servicios.id_for_label }}">Servicios:</label>
                         {{ form.servicios }}
                     </div>
-                    <div class="form">
-                        <p for="{{ form.local.id_for_label }}">Local:</p>
+                    <div class="form-group">
+                        <label for="{{ form.local.id_for_label }}">Local:</label>
                         {{ form.local }}
                     </div>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-
+                    <button type="submit" class="btn btn-primary btn-block">Guardar</button>
                 </form>
-
-
-                <a href="{% url 'update_tenants' %}" class="btn btn-secondary">Atras</a>
+                <a href="{% url 'update_tenants' %}" class="btn btn-secondary btn-block mt-3">Atras</a>
             </div>
         </div>
     </div>

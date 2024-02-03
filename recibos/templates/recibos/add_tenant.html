@@ -1,3 +1,4 @@
+<!-- add_tenant.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,28 +10,33 @@
     <!-- For example: -->
     <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
     <style>
-                        body {
-            background-color: #f8f9fa;
+        body {
+            background-color: #f3f4f6; /* Light grayish-blue background */
         }
         .container {
             margin-top: 50px;
         }
         .card {
-            width: 70%;
+            width: 100%;
             margin: auto;
         }
-        .form {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .card-header {
+            background-color: #3498db; /* Blue header color */
+            color: #fff;
+            font-size: 18px;
+        }
+        .card-body {
+            background-color: #fff; /* White card body */
+            padding: 20px;
+        }
+        .form-group {
             margin-bottom: 15px;
         }
         label {
-            width: 30%; /* Adjust the width based on your preference */
             font-size: 16px;
         }
         input {
-            width: 80%; /* Adjust the width based on your preference */
+            width: 100%;
             font-size: 16px;
         }
         .btn-primary {
@@ -40,14 +46,19 @@
 </head>
 <body>
     <div class="container">
-        <h2>Nuevo Inquilino</h2>
-        <form method="post" action="{% url 'add_tenant' %}">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Guardar</button>
-        </form>
-
-        <a href="{% url 'update_tenants' %}" class="btn btn-secondary mt-2">Atras</a>
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Nuevo Inquilino</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'add_tenant' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary btn-block">Guardar</button>
+                </form>
+                <a href="{% url 'update_tenants' %}" class="btn btn-secondary btn-block mt-2">Atras</a>
+            </div>
+        </div>
     </div>
 </body>
 </html>

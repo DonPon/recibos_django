@@ -9,63 +9,77 @@
     <!-- For example: -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-                        body {
-            background-color: #f8f9fa;
+        body {
+            background-color: #e9ecef; /* Light gray background for contrast */
         }
         .container {
             margin-top: 50px;
         }
         .card {
-            width: 70%;
-            margin: auto;
+            width: 100%;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            border: 1px solid #adb5bd; /* Darker border color for visibility */
+            border-radius: 8px;
+        }
+        .card:hover {
+            transform: scale(1.02);
+        }
+        .card-header {
+            background-color: #3f588da8;
+            color: #fff;
+            font-size: 18px;
+        }
+        .card-body {
+            padding: 20px;
         }
         .form-group {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 60px;
         }
         label {
-            width: 30%; /* Adjust the width based on your preference */
             font-size: 16px;
         }
         input {
-            width: 80%; /* Adjust the width based on your preference */
+            width: 100%;
             font-size: 16px;
         }
-        .btn-primary {
-            font-size: 16px;
+        .btn {
+            font-size: 12px;
+            border-radius: 5px;
+        }
+        /* Increase the contrast of secondary button */
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Inquilinos</h1>
-
+        <h1 class="mb-4">Inquilinos</h1>
         <a href="{% url 'add_tenant' %}" class="btn btn-success mb-3">Nuevo Inquilino</a>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Opciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for tenant in tenants %}
-                    <tr>
-                        <td>{{ tenant.name }}</td>
-                        <td>
-                            <a href="{% url 'update_tenant' tenant_name=tenant.name %}" class="btn btn-primary">Editar</a>
-                            <a href="{% url 'delete_tenant' tenant_name=tenant.name %}" class="btn btn-danger">Borrar</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary">Atras</a>
+        {% for tenant in tenants %}
+            <div class="card">
+                <div class="card-header">
+                    {{ tenant.name }}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6">
+                            <a href="{% url 'update_tenant' tenant_name=tenant.name %}" class="btn btn-primary btn-block float-right">Editar</a>
+                            <a href="{% url 'delete_tenant' tenant_name=tenant.name %}" class="btn btn-danger btn-block float-right mt-2">Borrar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary float-right">Atrás</a>
     </div>
 
 </body>
-
 </html>
+
