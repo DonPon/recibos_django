@@ -11,14 +11,15 @@
             background-color: #edeef0; /* Light grayish-blue background */
         }
         .container {
-            margin-top: 50px;
+            margin-top: 20px;
+            margin-bottom: 100px;
         }
         .card {
             width: 100%;
             margin: auto;
         }
         .card-header {
-            background-color: #3498db; /* Blue header color */
+            background-color: #a18dd6; /* Blue header color */
             color: #fff;
             font-size: 18px;
         }
@@ -45,7 +46,7 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h1 class="card-title">{{ editing_tenant.name }}</h1>
+                <h3 class="card-title">{{ editing_tenant.name }}</h3>
             </div>
             <div class="card-body">
                 <form method="post" action="{% url 'update_tenant' tenant_name=editing_tenant.name %}">
@@ -74,11 +75,12 @@
                         <label for="{{ form.local.id_for_label }}">Local:</label>
                         {{ form.local }}
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Guardar</button>
+                    <button type="submit" class="btn btn-success btn-block">Guardar</button>
                 </form>
-                <a href="{% url 'update_tenants' %}" class="btn btn-secondary btn-block mt-3">Atras</a>
+                <a href="{% url 'update_tenants' %}" class="btn btn-outline-primary btn-block">← Atrás</a>
             </div>
         </div>
     </div>
+
 </body>
 </html>

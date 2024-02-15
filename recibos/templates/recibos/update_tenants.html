@@ -1,19 +1,22 @@
 <!-- update_tenants.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inquilinos</title>
-    <!-- Add Bootstrap CDN links here if not included in your project -->
-    <!-- For example: -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+{% extends 'recibos/base.html' %}
+
+{% block title %}Generador de Recibos{% endblock %}
+
+{% block header %}
+    <!-- Additional header content specific to generate_pdfs.html can be added here if needed -->
+    <h1>Mis Inquilinos</h1>
+{% endblock %}
+
+{% block content %}
+
     <style>
         body {
-            background-color: #edeef0; /* Slightly off-white background */
+            
         }
         .container {
-            margin-top: 50px;
+            margin-top: 0px;
+            margin-bottom: 100px;
         }
         .card {
             width: 100%;
@@ -27,9 +30,7 @@
             transform: scale(1.02);
         }
         .card-header {
-            background-color: #ffffff; /* Dark teal background for contrast */
-            color: #666666;
-            font-size: 18px;
+
         }
         .card-body {
             padding: 20px;
@@ -59,11 +60,22 @@
         }
     </style>
 </head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css">
 <body>
     <div class="container">
-        <h1 class="mb-4">Inquilinos</h1>
-        <a href="{% url 'add_tenant' %}" class="btn btn-success btn-block mb-3">Nuevo Inquilino</a>
-
+        En esta sección podrás editar tus inquilinos
+                    <!-- Buttons customization -->
+                    <div class="d-flex mt-3">
+                        <a href="{% url 'generate_pdfs' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-arrow-left"></i> ← Atrás
+                        </a>
+                        <div class="flex-grow-1 ml-2">
+                            <a href="{% url 'add_tenant' %}" class="btn btn-success btn-block">
+                                &#43;  Nuevo Inquilino
+                            </a>
+                        </div>
+                    </div>
+                    <br>
         {% for tenant in tenants %}
             <div class="card">
                 <div class="card-header">
@@ -81,8 +93,9 @@
             </div>
         {% endfor %}
 
-        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary btn-block mt-3">Atrás</a>
+        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary btn-block mt-3">← Atrás</a>
     </div>
 
 </body>
 </html>
+{% endblock %}
