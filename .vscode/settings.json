@@ -1,4 +1,9 @@
 {
-    "terminal.explorerKind": "integrated",
-    "terminal.integrated.shell.windows": "C:\\Users\\4PF26LA_RS5\\anaconda3\\Scripts\\activate.bat"
+    "terminal.integrated.shell.windows": "%windir%\\System32\\cmd.exe",
+    "terminal.integrated.shellArgs.windows": [
+        "/K",
+        "C:\\Users\\4PF26LA_RS5\\anaconda3\\Scripts\\activate.bat",
+        "C:\\Users\\4PF26LA_RS5\\anaconda3"
+    ],
+    "python.terminal.activateEnvironment": true
 }

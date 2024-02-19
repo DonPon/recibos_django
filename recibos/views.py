@@ -1,7 +1,7 @@
 import time
 
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Tenant
+from .models import Tenant, Contract
 from .forms import *
 import datetime
 from .src.src_pdf_utils import *
@@ -98,9 +98,11 @@ def update_tenants(request, tenant_name=None):
         return render(request, 'recibos/update_tenants.html', {'tenants': tenants})
 
 
-
 def update_success(request):
     return render(request, 'recibos/update_success.html')
+
+def contracts_update_success(request):
+    return render(request, 'contratos/update_success.html')
 
 def add_tenant(request):
     if request.method == 'POST':
@@ -151,3 +153,108 @@ def delete_tenant(request, tenant_name):
 
     return render(request, 'recibos/delete_tenant.html', {'tenant': tenant})
 
+
+def all_contracts(request, tenant_name=None):
+    contracts = Contract.objects.all()
+
+    if tenant_name:
+        # Get the tenant instance
+        contract = Contract.objects.get(nombre_arrendatario=tenant_name)
+
+        if request.method == 'POST':
+            form = ContractForm(request.POST, instance=contract)
+            if form.is_valid():
+                # Save the changes
+                form.save()
+                if not ',' in contract.precio:
+                    contract.precio = "{:,.2f}".format(float(contract.precio))
+
+                elif ',' in contract.precio:
+                    precio_temp = contract.precio
+                    contract.precio = "{:,.2f}".format(float(precio_temp.replace(',','')))
+
+                contract.precio_en_letra = contract.precio_en_letra.upper()
+                contract.servicios = contract.servicios.lower()
+                if 'PESOS' in contract.precio_en_letra:
+                    contract.precio_en_letra = contract.precio_en_letra.replace('PESOS', '')
+
+                contract.save()
+
+                return redirect('contracts_update_success')  # Redirect to a success page
+        else:
+            # Transform data before rendering the form
+            # tenant.name = tenant.name.upper()
+            # tenant.precio_en_letra = tenant.precio_en_letra.upper()
+            # tenant.servicios = tenant.servicios.lower()
+            # if 'PESOS' in tenant.precio_en_letra:
+            #    tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')
+
+            # if not '.00' in tenant.precio:
+            #     tenant.precio = f'{tenant.precio}.00'
+
+            # tenant.save()
+
+            form = ContractForm(instance=contract)
+
+        return render(request, 'contratos/update_contract.html', {'form': form, 'editing_tenant': contract})
+    else:
+        # Display the list of tenants
+
+        return render(request,'contratos/all_contracts.html', {'contracts': contracts})
+    
+
+def add_contract(request):
+    if request.method == 'POST':
+        form = ContractForm(request.POST)
+
+        if form.is_valid():
+            # Transform data before saving
+            nombre_arrendatario = form.cleaned_data['nombre_arrendatario'].upper()
+            ine_arrendatario = form.cleaned_data['ine_arrendatario'].upper()
+            precio_en_letra = form.cleaned_data['precio_en_letra'].upper()
+            servicios = form.cleaned_data['servicios'].lower()
+            local = form.cleaned_data['local']
+            dia_de_pago = form.cleaned_data['dia_de_pago']
+            fecha_inicio_contrato = form.cleaned_data['fecha_inicio_contrato']
+            fecha_vencimiento_contrato = form.cleaned_data['fecha_vencimiento_contrato']
+            precio = form.cleaned_data['precio']
+
+
+            if 'PESOS' in precio_en_letra:
+                precio_en_letra = precio_en_letra.replace('PESOS', '')
+
+
+            precio = "{:,.2f}".format(float(precio.replace(',','')))
+
+
+            # Create a new instance of your model and set the fields
+            new_contract = Contract(
+                nombre_arrendatario=nombre_arrendatario,
+                ine_arrendatario=ine_arrendatario,
+                precio_en_letra=precio_en_letra,
+                servicios=servicios,
+                dia_de_pago=dia_de_pago,
+                precio=precio,
+                fecha_inicio_contrato=fecha_inicio_contrato,
+                fecha_vencimiento_contrato=fecha_vencimiento_contrato,
+                local=local
+                # Add other fields as needed
+            )
+
+            # Save the new instance
+            new_contract.save()
+            return redirect('all_contracts')  # Redirect to the same page after adding a tenant
+    else:
+        form = ContractForm()
+
+    return render(request, 'contratos/add_contract.html', {'form': form})
+
+
+def delete_contract(request, tenant_name):
+    contract = get_object_or_404(Contract, nombre_arrendatario=tenant_name)
+
+    if request.method == 'POST':
+        contract.delete()
+        return redirect('generate_pdfs')  # Redirect to the home page or another appropriate page
+
+    return render(request, 'contratos/delete_contract.html', {'tenant': contract})

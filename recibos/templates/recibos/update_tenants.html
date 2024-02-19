@@ -33,6 +33,10 @@
         .card-body {
             padding: 20px;
         }
+        .card-body h6 {
+
+            color:  #686d6e;
+        }
         .form-group {
             margin-bottom: 20px;
         }
@@ -80,6 +84,9 @@
                     {{ tenant.name }}
                 </div>
                 <div class="card-body">
+                    <h6>
+                        <span class="bold-label">Monto:</span> ${{ tenant.precio }}
+                    </h6>
                     <div class="row">
                         <div class="col-md-6"></div>
                         <div class="col-md-6">

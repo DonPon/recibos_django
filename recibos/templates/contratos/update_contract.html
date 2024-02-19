@@ -1,0 +1,108 @@
+<!-- update_contract.html -->
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Actualizar</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #edeef0; /* Light grayish-blue background */
+        }
+        .container {
+            margin-top: 20px;
+            margin-bottom: 100px;
+        }
+        .card {
+            width: 100%;
+            margin: auto;
+        }
+        .card-header {
+            /*background-color: #a18dd6;  Blue header color */
+            background: linear-gradient(to right, #815ee0 , #d6659e);
+            color: #fff;
+            font-size: 18px;
+        }
+        .card-body {
+            background-color: #fff; /* White card body */
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-size: 16px;
+        }
+        input {
+            width: 100%;
+            font-size: 16px;
+        }
+        .btn-primary {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">{{ editing_tenant.nombre_arrendatario }}</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'update_contract' tenant_name=editing_tenant.nombre_arrendatario %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="{{ form.nombre_arrendatario.id_for_label }}">Nombre:</label>
+                        {{ form.nombre_arrendatario }}
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="{{ form.ine_arrendatario.id_for_label }}">INE Arrendatario:</label>
+                        {{ form.ine_arrendatario }}
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="{{ form.fecha_inicio_contrato.id_for_label }}">Fecha Inicio Contrato:</label>
+                        {{ form.fecha_inicio_contrato }}
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="{{ form.fecha_vencimiento_contrato.id_for_label }}">Fecha Vencimiento Contrato:</label>
+                        {{ form.fecha_vencimiento_contrato }}
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="{{ form.dia_de_pago.id_for_label }}">Dia de pago:</label>
+                        {{ form.dia_de_pago }}
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="{{ form.precio.id_for_label }}">Precio:</label>
+                        {{ form.precio }}
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="{{ form.precio_en_letra.id_for_label }}">Precio en Letra:</label>
+                        {{ form.precio_en_letra }}
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="{{ form.servicios.id_for_label }}">Servicios:</label>
+                        {{ form.servicios }}
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="{{ form.local.id_for_label }}">Local:</label>
+                        {{ form.local }}
+                    </div>
+                
+                    <button type="submit" class="btn btn-success btn-block">Guardar</button>
+                </form>
+                <a href="{% url 'all_contracts' %}" class="btn btn-secondary btn-block">← Cancelar</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
