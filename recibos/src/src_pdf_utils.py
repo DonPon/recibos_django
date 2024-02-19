@@ -15,6 +15,7 @@ from django.http import HttpResponse
 from email import encoders
 from django.conf import settings
 import io
+from .src_email import *
 
 
 def create_pdf(subject, text, month, name):
@@ -215,9 +216,9 @@ def send_emails(files, month):
     # Compose the email
     subject = f"Recibos {month.upper()}"
     body = f"Recibos para el mes de {month}"
-    from_email = "projects.franz@gmail.com"
-    to_email = "gabysurel@yahoo.com.mx"
-    cc_email = "franzeckermann@gmail.com"
+    #from_email = "projects.franz@gmail.com"
+    #to_email = "gabysurel@yahoo.com.mx"
+    #cc_email = "franzeckermann@gmail.com"
 
     # Create a multipart message
     message = MIMEMultipart()
@@ -243,10 +244,10 @@ def send_emails(files, month):
         message.attach(attachment)
 
     # Connect to the SMTP server and send the email
-    smtp_server = 'smtp.gmail.com'
-    smtp_port = 587
-    smtp_username = 'projects.franz@gmail.com'
-    smtp_password = 'ugcx uano rucc rdko'
+    #smtp_server = 'smtp.gmail.com'
+    #smtp_port = 587
+    #smtp_username = 'projects.franz@gmail.com'
+    #smtp_password = 'ugcx uano rucc rdko'
 
 
     with smtplib.SMTP(smtp_server, smtp_port) as server:

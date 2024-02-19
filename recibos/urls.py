@@ -15,4 +15,5 @@ urlpatterns = [
     path('contracts/add/', add_contract, name='add_contract'),
     path('contracts/<str:tenant_name>/delete/', delete_contract, name='delete_contract'),
     path('contracts/update_success/', contracts_update_success, name='contracts_update_success'),
+    path('contracts/reminder/', reminder, name='reminder'),
 ]

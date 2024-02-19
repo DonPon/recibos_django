@@ -1,10 +1,14 @@
 import time
-
+from .src.src_email import *
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Tenant, Contract
 from .forms import *
 import datetime
 from .src.src_pdf_utils import *
+from .src.src_dates import *
+from django.http import HttpResponseServerError
+
+
 
 
 def generate_pdfs(request):
@@ -258,3 +262,37 @@ def delete_contract(request, tenant_name):
         return redirect('generate_pdfs')  # Redirect to the home page or another appropriate page
 
     return render(request, 'contratos/delete_contract.html', {'tenant': contract})
+
+
+def reminder(request):
+    try:
+        contracts = Contract.objects.all()
+        for contract in contracts:
+            vencimiento = parse_date_string(contract.fecha_vencimiento_contrato)
+            #print(f"vencimiento: {vencimiento}")
+            flag = flag_one_month_to_date(vencimiento)
+            print(flag)
+            if flag:
+                import textwrap
+                body = textwrap.dedent(f"""
+                    Hola,
+                    El siguiente contrato está próximo a vencer en 15 días:
+                    
+                    Arrendatario: {contract.nombre_arrendatario}
+                    Vencimiento: {contract.fecha_vencimiento_contrato}
+                    Local: {contract.local}
+                    Monto renta: ${contract.precio}
+
+                    Puedes renovarlo aqui: https://recibos-django.onrender.com/contracts/all-contracts/
+
+                    © 2024 Franz Eckermann
+                """)
+
+                send_email("Próximo Vencimiento de Contrato",body)
+
+
+        return redirect('generate_pdfs')
+    except Exception as e:
+        # Log the exception
+        print(f"An error occurred: {e}")
+        return HttpResponseServerError("Internal Server Error")
