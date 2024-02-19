@@ -266,13 +266,14 @@ def delete_contract(request, tenant_name):
 
 def reminder(request):
     try:
+        contract_info_html = []
         contracts = Contract.objects.all()
         for contract in contracts:
             vencimiento = parse_date_string(contract.fecha_vencimiento_contrato)
             #print(f"vencimiento: {vencimiento}")
             flag = flag_one_month_to_date(vencimiento)
             print(flag)
-            if flag:
+            if flag:               
                 import textwrap
                 body = textwrap.dedent(f"""
                     Hola,
@@ -287,11 +288,18 @@ def reminder(request):
 
                     © 2024 Franz Eckermann
                 """)
-
                 send_email("Próximo Vencimiento de Contrato",body)
 
-
-        return redirect('generate_pdfs')
+            contract_info_html.append(f"""
+                <p>Arrendatario: {contract.nombre_arrendatario}</p>
+                <p>Vencimiento: {contract.fecha_vencimiento_contrato}</p>
+                <p>Local: {contract.local}</p>
+                <p>Monto renta: ${contract.precio}</p>
+                <p>Puedes renovarlo aquí: <a href="https://recibos-django.onrender.com/contracts/all-contracts/">Renovar Contrato</a></p>
+                <hr>
+            """)
+        return HttpResponse("".join(contract_info_html))
+    
     except Exception as e:
         # Log the exception
         print(f"An error occurred: {e}")
