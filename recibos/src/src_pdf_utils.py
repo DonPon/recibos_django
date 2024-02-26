@@ -206,7 +206,8 @@ def create_pdf_email(subject, text, month, name):
 
     # Create the full filepath using MEDIA_ROOT
     #filepath = os.path.join(settings.MEDIA_ROOT, filename)
-    pdf_content = ContentFile(pdf.output(name=filename).encode('latin-1'))
+    pdf.output(name=filename)
+    #pdf_content = ContentFile(pdf.output(name=filename).encode('latin-1'))
 
     return filename
 
@@ -318,5 +319,32 @@ def create_pdf_reportlab(subject, text, month, name):
 
 
 #tenant1 = Tenant(name='JOSE ANTONIO HURTADO LOPEZ', dia='01', precio='6,580.00', precio_en_letra='SEIS MIL QUINIENTOS OCHENTA', servicios='renta y mantenimiento', local='26-C')
-#tenant2 = Tenant(name='IRWING ARTURO PEÑA VARGAS', dia='15', precio='10,500.00', precio_en_letra='DIEZ MIL QUINIENTOS', servicios='renta', local='5-B')
+#tenant2 = Tenant(name='IRWING ARTURO PE?A VARGAS', dia='15', precio='10,500.00', precio_en_letra='DIEZ MIL QUINIENTOS', servicios='renta', local='5-B')
 #tenant3 = Tenant(name='FRANCISCO SANCHEZ GALEANA', dia='15', precio='7,505.00', precio_en_letra='SIETE MIL QUINIENTOS CINCO', servicios='renta, mantenimiento, agua y luz', local='26')
+
+
+def create_contract_pdf(text):
+    # Create a new PDF document.
+    pdf = fpdf.FPDF(format='Letter')
+
+    # Set slightly larger margins
+    pdf.set_margins(left=30, top=30, right=30)
+
+    # Add a new page.
+    pdf.add_page()
+    # Set font for body text
+    pdf.set_font('Arial', '', 12)
+    # Add the body text
+    # Encode the string to bytes using UTF-8
+    encoded_text = text.encode('utf-8')
+    pdf.multi_cell(0, 8, encoded_text, align='J')
+
+
+    # Define the filename
+    filename = f"CONTRATO_SAMPLE.pdf"
+
+    # Create the full filepath using MEDIA_ROOT
+    #filepath = os.path.join(settings.MEDIA_ROOT, filename)
+    pdf_content = ContentFile(pdf.output(name=filename).encode('utf-8'))
+
+    return filename

@@ -6,7 +6,7 @@ from email.mime.application import MIMEApplication
 from email.mime.base import MIMEBase
 from email import encoders
 
-TEST = False
+TEST = True
 
 if TEST == True:
     to_email = "franzeckermann@gmail.com"

@@ -247,6 +247,7 @@ def add_contract(request):
 
             # Save the new instance
             new_contract.save()
+
             return redirect('all_contracts')  # Redirect to the same page after adding a tenant
     else:
         form = ContractForm()
