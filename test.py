@@ -1,13 +1,8 @@
 from fpdf import FPDF
-from recibos.src.strings import contrato_3, contrato_4, contrato_full
+from recibos.src.strings import *
 
-# Basic HTML tags supported: <b>, <i>, <u>, <blockquote>, <br>, <p>
-html_string = """<b>This is a bold text</b><br><i>This is italic text</i><br><u>This is underlined text</u>"""
 
-#pdf = FPDF()
-#pdf.add_page()
-#pdf.write_html(contrato_html)
-#pdf.output("output.pdf")
+contract = constructor_contract()
 
 class MyPDF(FPDF):
     def header(self):
@@ -34,7 +29,7 @@ pdf.add_page()
 # Reset font for body text
 pdf.set_font('Helvetica', '', 12)
 
-for item in contrato_full:
+for item in contract:
     if '%TITLE%' in item:
         pdf.cell(0, 6, item.replace('%TITLE%',''), align='C', markdown=True)
         pdf.ln(2)

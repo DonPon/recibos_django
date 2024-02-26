@@ -16,137 +16,8 @@ from email import encoders
 from django.conf import settings
 import io
 from .src_email import *
+from .strings import *
 
-
-def create_pdf(subject, text, month, name):
-    # Create a new PDF document.
-    pdf = fpdf.FPDF(format='Letter')
-
-    # Set slightly larger margins
-    pdf.set_margins(left=30, top=30, right=30)
-
-    # Add a new page.
-    pdf.add_page()
-
-    # Set font for title
-    pdf.set_font('Arial', 'B', 20)
-
-    # Add the title text
-    pdf.cell(0, 8, 'RECIBO', align='C')
-
-    # Add a newline
-    pdf.ln(20)
-
-    # Reset font for body text
-    pdf.set_font('Arial', '', 14)
-
-    # Add the subject text
-    pdf.multi_cell(0, 8, subject, align='R')
-
-    # Add a newline
-    pdf.ln(20)
-
-    # Add the body text
-    pdf.multi_cell(0, 8, text, align='J')
-
-    # Add 5 new lines
-    for i in range(7):
-        pdf.ln(8)
-
-    # Draw a signature line
-    pdf.set_line_width(0.4)
-    pdf.line(pdf.get_x() + 35, pdf.get_y(), pdf.get_x() + 120, pdf.get_y())
-
-    # Add a newline
-    pdf.ln(1)
-
-    # Add signature text
-    pdf.set_font('Arial', '', 14)
-    pdf.multi_cell(0, 8, f'SRA. GABRIELA SEGURA\nLEYVA', align='C')
-
-    # Save the document.
-    # Specify the folder path
-    folder_path = "C:/Users/4PF26LA_RS5/Desktop/Recibos/"
-    # Check if the folder exists
-    if not os.path.exists(folder_path):
-        # Create the folder if it doesn't exist
-        os.makedirs(folder_path)
-
-    filename = f"C:/Users/4PF26LA_RS5/Desktop/Recibos/Recibo_{month.upper()}_{name}.pdf"
-    pdf.output(filename)
-
-def create_pdf_download(request, subject, text, month, name):
-    # Create a new PDF document.
-    pdf = fpdf.FPDF(format='Letter')
-
-    # Set slightly larger margins
-    pdf.set_margins(left=30, top=30, right=30)
-
-    # Add a new page.
-    pdf.add_page()
-
-    # Set font for title
-    pdf.set_font('Arial', 'B', 20)
-
-    # Add the title text
-    pdf.cell(0, 8, 'RECIBO', align='C')
-
-    # Add a newline
-    pdf.ln(20)
-
-    # Reset font for body text
-    pdf.set_font('Arial', '', 14)
-
-    # Add the subject text
-    pdf.multi_cell(0, 8, subject, align='R')
-
-    # Add a newline
-    pdf.ln(20)
-
-    # Add the body text
-    pdf.multi_cell(0, 8, text, align='J')
-
-    # Add 5 new lines
-    for i in range(7):
-        pdf.ln(8)
-
-    # Draw a signature line
-    pdf.set_line_width(0.4)
-    pdf.line(pdf.get_x() + 35, pdf.get_y(), pdf.get_x() + 120, pdf.get_y())
-
-    # Add a newline
-    pdf.ln(1)
-
-    # Add signature text
-    pdf.set_font('Arial', '', 14)
-    pdf.multi_cell(0, 8, f'SRA. GABRIELA SEGURA\nLEYVA', align='C')
-
-    # Specify the folder path
-    folder_path = "C:/Users/4PF26LA_RS5/Desktop/Recibos/"
-
-    # Create the folder if it doesn't exist
-    #if not os.path.exists(folder_path):
-    #    os.makedirs(folder_path)
-
-    # Define the filename
-    filename = f"Recibo_{month.upper()}_{name}.pdf"
-
-    # Create the full filepath
-    filepath = os.path.join(folder_path, filename)
-
-    # Save the document
-    pdf.output(filename)
-
-    # Open the file for reading in binary mode
-    with open(filename, 'rb') as file:
-        # Create an HttpResponse with the file's content for download
-        response = HttpResponse(file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename={filename}'
-
-    # Delete the file
-    #os.remove(filename)
-
-    return filename
 
 def create_pdf_email(subject, text, month, name):
     # Create a new PDF document.
@@ -263,88 +134,49 @@ def send_emails(files, month):
 
     for file_path_2 in files:
         os.remove(file_path_2)
-
-def create_pdf_reportlab(subject, text, month, name):
-    from django.http import FileResponse
-    from io import BytesIO
-    from reportlab.pdfgen import canvas
-    # Create a file-like buffer to receive PDF data.
-    buffer = BytesIO()
-
-    # Create the PDF object, using the buffer as its "file."
-    p = canvas.Canvas(buffer)
-
-    # Set slightly larger margins
-    # Load the font file from the default storage
-
-
-    p.setFont('B', 20)
-    p.drawString(20, 75, 'RECIBO')
-    p.ln(20)
-
-
-    p.setFont('', 14)
-    p.drawString(200, 200, subject)
-    p.ln(20)
-
-    p.drawString(20, 325, text)
-
-    # Add 5 new lines
-    for i in range(7):
-        p.ln(8)
-
-    # Draw a signature line
-    p.setLineWidth(0.4)
-    p.line(150, 470, 550, 470)
-
-    # Add a newline
-    p.ln(1)
-
-    # Add signature text
-    p.setFont('', 14)
-    p.drawString(350, 490, f'SRA. GABRIELA SEGURA\nLEYVA')
-
-    # Define the filename
-    filename = f"Recibo_{month.upper()}_{name}.pdf"
-
-    # Save the PDF file to the buffer.
-    p.showPage()
-    p.save()
-
-    # Close the PDF object cleanly, and we're done.
-    buffer.seek(0)
-
-    # Create the FileResponse object.
-    return FileResponse(buffer, as_attachment=True, filename=filename)
-
-
+        
 #tenant1 = Tenant(name='JOSE ANTONIO HURTADO LOPEZ', dia='01', precio='6,580.00', precio_en_letra='SEIS MIL QUINIENTOS OCHENTA', servicios='renta y mantenimiento', local='26-C')
 #tenant2 = Tenant(name='IRWING ARTURO PE?A VARGAS', dia='15', precio='10,500.00', precio_en_letra='DIEZ MIL QUINIENTOS', servicios='renta', local='5-B')
 #tenant3 = Tenant(name='FRANCISCO SANCHEZ GALEANA', dia='15', precio='7,505.00', precio_en_letra='SIETE MIL QUINIENTOS CINCO', servicios='renta, mantenimiento, agua y luz', local='26')
 
 
 def create_contract_pdf(text):
+
+    contract = constructor_contract()
+    
+    class MyPDF(FPDF):
+        def header(self):
+            # Your header implementation here (if any)
+            pass
+
+        def footer(self):
+            # Set font for the footer
+            self.set_font('Helvetica', 'I', 10)
+
+            # Position at 15 mm from bottom
+            self.set_y(-15)
+
+            # Add a page number as a footnote
+            footnote_text = f"{self.page_no()}"
+            self.cell(0, 10, footnote_text, 0, 0, 'R')
+
     # Create a new PDF document.
-    pdf = fpdf.FPDF(format='Letter')
-
+    pdf = MyPDF(format='Legal')
     # Set slightly larger margins
-    pdf.set_margins(left=30, top=30, right=30)
-
-    # Add a new page.
+    pdf.set_margins(left=30, top=15, right=30)
+    #Add a new page.
     pdf.add_page()
-    # Set font for body text
-    pdf.set_font('Arial', '', 12)
-    # Add the body text
-    # Encode the string to bytes using UTF-8
-    encoded_text = text.encode('utf-8')
-    pdf.multi_cell(0, 8, encoded_text, align='J')
+    # Reset font for body text
+    pdf.set_font('Helvetica', '', 12)
+
+    for item in contract:
+        if '%TITLE%' in item:
+            pdf.cell(0, 6, item.replace('%TITLE%',''), align='C', markdown=True)
+            pdf.ln(2)
+        else:
+            pdf.multi_cell(0, 6, item, align='J', markdown=True)
 
 
-    # Define the filename
-    filename = f"CONTRATO_SAMPLE.pdf"
-
-    # Create the full filepath using MEDIA_ROOT
-    #filepath = os.path.join(settings.MEDIA_ROOT, filename)
-    pdf_content = ContentFile(pdf.output(name=filename).encode('utf-8'))
-
+    filename = f"sample_contrato.pdf"
+    pdf.output(name=filename)
     return filename
