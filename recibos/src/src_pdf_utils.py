@@ -188,7 +188,7 @@ def create_contract_pdf(text):
 
 
 def create_contract_from_md_files():
-    contract, signatures = constructor_contract_2()
+    contract, signatures = constructor_contract()
 
     class MyPDF(fpdf.FPDF):
         def header(self):
@@ -217,9 +217,8 @@ def create_contract_from_md_files():
 
     for item in contract:
         if '%TITLE%' in item:
-            pdf.ln(8)
             pdf.cell(0, 6, item.replace('%TITLE%',''), align='C', markdown=True)
-            pdf.ln(8)
+            pdf.ln(2)
         else:
             pdf.multi_cell(0, 6, item, align='J', markdown=True)
 
