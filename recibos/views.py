@@ -250,7 +250,13 @@ def add_contract(request):
 
             return redirect('all_contracts')  # Redirect to the same page after adding a tenant
     else:
-        form = ContractForm()
+        #form = ContractForm()
+        try:
+            file = create_contract_from_md_files()
+            time.sleep(1)
+            send_emails([file], 'EJEMPLO')
+        except Exception as e:
+            print(e)
 
     return render(request, 'contratos/add_contract.html', {'form': form})
 
