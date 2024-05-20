@@ -83,14 +83,23 @@ WSGI_APPLICATION = 'recibos_django.wsgi.application'
     }
 }"""
 import dj_database_url
+
+DB = {
+        'elephantsql': dj_database_url.parse('postgres://hgokxebu:95LRot5Dn-p3hUI2NWYQjJH_t4x3lnOS@flora.db.elephantsql.com/hgokxebu'),
+        'neon': dj_database_url.parse('postgresql://recibos_django_db_owner:i3xBlyV4KZJn@ep-misty-cake-a2jdw1by.eu-central-1.aws.neon.tech/recibos_django_db?sslmode=require'),
+}
+
 DATABASES = {
-    'default': dj_database_url.parse('postgres://hgokxebu:95LRot5Dn-p3hUI2NWYQjJH_t4x3lnOS@flora.db.elephantsql.com/hgokxebu')
+    'default': DB['neon'],
 }
 # PostgreSQL from render.com:
 # postgres://productiondatabase_efvp_user:TkHJqJvutRgI0sWdmxRyt4TJ9Ca5gs9T@dpg-clnl3bde89qs739hpva0-a.frankfurt-postgres.render.com/productiondatabase_efvp
 
 # PostrgreSQL from elephant free:
 # postgres://hgokxebu:95LRot5Dn-p3hUI2NWYQjJH_t4x3lnOS@flora.db.elephantsql.com/hgokxebu
+
+# Postgres NEON free:
+# postgresql://recibos_django_db_owner:i3xBlyV4KZJn@ep-misty-cake-a2jdw1by.eu-central-1.aws.neon.tech/recibos_django_db?sslmode=require
 
 
 # Password validation
