@@ -8,7 +8,8 @@ class MonthForm(forms.Form):
 class TenantForm(forms.ModelForm):
     class Meta:
         model = Tenant
-        fields = ['name', 'dia', 'precio', 'precio_en_letra', 'servicios', 'local']
+        fields = ['name', 'dia', 'precio', 'servicios', 'local']
+        # fields = ['name', 'dia', 'precio', 'precio_en_letra', 'servicios', 'local']
 
 class ContractForm(forms.ModelForm):
     class Meta:

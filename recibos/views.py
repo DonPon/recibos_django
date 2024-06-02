@@ -7,6 +7,7 @@ import datetime
 from .src.src_pdf_utils import *
 from .src.src_dates import *
 from django.http import HttpResponseServerError
+from num2words import num2words
 
 
 
@@ -23,7 +24,8 @@ def generate_pdfs(request):
             for tenant in tenants:
                 day = tenant.dia
                 price = tenant.precio
-                price_letters = tenant.precio_en_letra
+                # price_letters = tenant.precio_en_letra
+                price_letters = num2words(price.split('.')[0].replace(',',''), lang='es')
                 servicios = tenant.servicios
                 local = tenant.local
 
@@ -73,10 +75,11 @@ def update_tenants(request, tenant_name=None):
                     precio_temp = tenant.precio
                     tenant.precio = "{:,.2f}".format(float(precio_temp.replace(',','')))
 
-                tenant.precio_en_letra = tenant.precio_en_letra.upper()
                 tenant.servicios = tenant.servicios.lower()
+
+                """tenant.precio_en_letra = tenant.precio_en_letra.upper()
                 if 'PESOS' in tenant.precio_en_letra:
-                    tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')
+                    tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')"""
 
                 tenant.save()
 
@@ -115,23 +118,23 @@ def add_tenant(request):
         if form.is_valid():
             # Transform data before saving
             name = form.cleaned_data['name'].upper()
-            precio_en_letra = form.cleaned_data['precio_en_letra'].upper()
+            # precio_en_letra = form.cleaned_data['precio_en_letra'].upper()
             servicios = form.cleaned_data['servicios'].lower()
             local = form.cleaned_data['local']
             dia = form.cleaned_data['dia']
             precio = form.cleaned_data['precio']
 
-            if 'PESOS' in precio_en_letra:
-                precio_en_letra = precio_en_letra.replace('PESOS', '')
+            """if 'PESOS' in precio_en_letra:
+                precio_en_letra = precio_en_letra.replace('PESOS', '')"""
 
 
             precio = "{:,.2f}".format(float(precio.replace(',','')))
 
 
             # Create a new instance of your model and set the fields
+            # precio_en_letra=precio_en_letra,
             new_tenant = Tenant(
                 name=name,
-                precio_en_letra=precio_en_letra,
                 servicios=servicios,
                 dia=dia,
                 precio=precio,

@@ -206,7 +206,8 @@ def create_pdf_email(subject, text, month, name):
 
     # Create the full filepath using MEDIA_ROOT
     #filepath = os.path.join(settings.MEDIA_ROOT, filename)
-    pdf_content = ContentFile(pdf.output(name=filename).encode('latin-1'))
+    #pdf_content = ContentFile(pdf.output(name=filename))
+    pdf.output(name=filename)
 
     return filename
 
