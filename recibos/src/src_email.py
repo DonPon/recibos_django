@@ -6,12 +6,19 @@ from email.mime.application import MIMEApplication
 from email.mime.base import MIMEBase
 from email import encoders
 
-TEST = False
+from dotenv import load_dotenv
 
-if TEST == True:
+load_dotenv()
+ENV = os.getenv('ENV')
+# TEST = False
+
+
+if ENV == 'TEST':
     to_email = "franzeckermann@gmail.com"
-elif TEST == False:
+    print('is testing')
+elif ENV == 'PROD':
     to_email = "gabysurel@yahoo.com.mx"
+    print('is prod')
 
 from_email = "projects.franz@gmail.com"
 cc_email = "franzeckermann@gmail.com"

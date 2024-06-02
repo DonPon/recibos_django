@@ -3,3 +3,6 @@ recibos_django/__pycache__/
 recibos/__pycache__/
 recibos/migrations/__pycache__/
 recibos/src/__pycache__/
+
+# Ignore the .env file
+.env

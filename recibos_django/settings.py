@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+print(os.getenv('DATABASE_URL'))
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 #BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +30,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'django-insecure-dd9+#ubg=zw^+e#-510sutmgk63jq4(_gt(iea3-y*sb2plob$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+try:
+    if os.getenv('ENV') == 'TEST':
+        DEBUG = True
+    else:
+        DEBUG = False
+except:
+    DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -82,11 +93,12 @@ WSGI_APPLICATION = 'recibos_django.wsgi.application'
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }"""
+
 import dj_database_url
 
 DB = {
         'elephantsql': dj_database_url.parse('postgres://hgokxebu:95LRot5Dn-p3hUI2NWYQjJH_t4x3lnOS@flora.db.elephantsql.com/hgokxebu'),
-        'neon': dj_database_url.parse('postgresql://recibos_django_db_owner:i3xBlyV4KZJn@ep-misty-cake-a2jdw1by.eu-central-1.aws.neon.tech/recibos_django_db?sslmode=require'),
+        'neon': dj_database_url.parse(os.getenv('DATABASE_URL')),
 }
 
 DATABASES = {
