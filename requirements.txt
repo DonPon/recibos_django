@@ -11,3 +11,5 @@ sqlparse==0.4.4
 typing_extensions==4.8.0
 tzdata==2023.3
 num2words==0.5.13
+python-dotenv==1.0.1
+
