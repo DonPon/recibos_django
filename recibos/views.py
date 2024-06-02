@@ -9,6 +9,12 @@ from .src.src_dates import *
 from django.http import HttpResponseServerError
 from num2words import num2words
 
+from dotenv import load_dotenv
+
+load_dotenv()
+ENV = os.getenv('ENV')
+
+
 
 
 
@@ -46,12 +52,12 @@ def generate_pdfs(request):
 
                 #response = create_pdf_download(request, subject, text, month, tenant.name)
 
-            return render(request, 'recibos/pdf_generated.html', {'month': month})
+            return render(request, 'recibos/pdf_generated.html', {'month': month, 'ENV':ENV})
 
     else:
         form = MonthForm()
 
-    return render(request, 'recibos/generate_pdfs.html', {'form': form})
+    return render(request, 'recibos/generate_pdfs.html', {'form': form, 'ENV':ENV})
 
 
 def update_tenants(request, tenant_name=None):
@@ -99,10 +105,10 @@ def update_tenants(request, tenant_name=None):
 
             form = TenantForm(instance=tenant)
 
-        return render(request, 'recibos/update_tenant.html', {'form': form, 'editing_tenant': tenant})
+        return render(request, 'recibos/update_tenant.html', {'form': form, 'editing_tenant': tenant, 'ENV':ENV})
     else:
         # Display the list of tenants
-        return render(request, 'recibos/update_tenants.html', {'tenants': tenants})
+        return render(request, 'recibos/update_tenants.html', {'tenants': tenants, 'ENV':ENV})
 
 
 def update_success(request):
