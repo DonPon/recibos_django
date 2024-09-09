@@ -10,22 +10,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 ENV = os.getenv('ENV')
-# TEST = False
-
-
-if ENV == 'TEST':
-    to_email = "franzeckermann@gmail.com"
-    print('is testing')
-elif ENV == 'PROD':
-    to_email = "gabysurel@yahoo.com.mx"
-    print('is prod')
-
-from_email = "projects.franz@gmail.com"
-cc_email = "franzeckermann@gmail.com"
+to_email = os.getenv('TO_EMAIL')
+from_email = os.getenv('FROM_EMAIL')
+cc_email = os.getenv('CC_EMAIL')
+smtp_password = os.getenv('SMTP_PASSWORD')
 smtp_server = 'smtp.gmail.com'
 smtp_port = 587
-smtp_username = 'projects.franz@gmail.com'
-smtp_password = 'ugcx uano rucc rdko'
+smtp_username = from_email
+
 
 
 def send_email(subject,body,file_path=None):
@@ -64,8 +56,5 @@ def send_email(subject,body,file_path=None):
         # Delete the files
         # default_storage.delete(file_path)
         os.remove(file_path)
-
-
-
 
 
