@@ -2,6 +2,7 @@
 from django import forms
 from .models import Tenant, Contract
 
+
 class MonthForm(forms.Form):
     month = forms.CharField(label='Enter the Month', max_length=255)
 
@@ -16,3 +17,10 @@ class ContractForm(forms.ModelForm):
         model = Contract
         fields = ['nombre_arrendatario', 'ine_arrendatario', 'fecha_inicio_contrato', 
                   'fecha_vencimiento_contrato', 'dia_de_pago', 'precio','precio_en_letra','servicios','local']
+
+# authentication/forms.py
+from django import forms
+
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=63)
+    password = forms.CharField(max_length=63, widget=forms.PasswordInput)
