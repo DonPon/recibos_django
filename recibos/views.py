@@ -8,16 +8,34 @@ from .src.src_pdf_utils import *
 from .src.src_dates import *
 from django.http import HttpResponseServerError
 from num2words import num2words
-
+from django.contrib.auth import login, authenticate
 from dotenv import load_dotenv
+from django.contrib.auth.decorators import login_required
 
 load_dotenv()
 ENV = os.getenv('ENV')
 
 
+def login_page(request):
+    form = LoginForm()
+    message = ''
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            user = authenticate(
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password'],
+            )
+            if user is not None:
+                login(request, user)
+                message = f'Hola {user.username}!'
+                return redirect('generate_pdfs')
+            else:
+                message = 'Contraseña incorrecta.'
+    return render(
+        request, 'authentication/login.html', context={'form': form, 'message': message, 'ENV':ENV})
 
-
-
+@login_required(login_url='login/')
 def generate_pdfs(request):
     if request.method == 'POST':
         form = MonthForm(request.POST)
@@ -59,7 +77,7 @@ def generate_pdfs(request):
 
     return render(request, 'recibos/generate_pdfs.html', {'form': form, 'ENV':ENV})
 
-
+@login_required(login_url='login/')
 def update_tenants(request, tenant_name=None):
     tenants = Tenant.objects.all()
 
@@ -110,13 +128,15 @@ def update_tenants(request, tenant_name=None):
         # Display the list of tenants
         return render(request, 'recibos/update_tenants.html', {'tenants': tenants, 'ENV':ENV})
 
-
+@login_required(login_url='login/')
 def update_success(request):
     return render(request, 'recibos/update_success.html')
 
+@login_required(login_url='login/')
 def contracts_update_success(request):
     return render(request, 'contratos/update_success.html')
 
+@login_required(login_url='login/')
 def add_tenant(request):
     if request.method == 'POST':
         form = TenantForm(request.POST)
@@ -156,7 +176,7 @@ def add_tenant(request):
 
     return render(request, 'recibos/add_tenant.html', {'form': form})
 
-
+@login_required(login_url='login/')
 def delete_tenant(request, tenant_name):
     tenant = get_object_or_404(Tenant, name=tenant_name)
 
@@ -166,7 +186,7 @@ def delete_tenant(request, tenant_name):
 
     return render(request, 'recibos/delete_tenant.html', {'tenant': tenant})
 
-
+@login_required(login_url='login/')
 def all_contracts(request, tenant_name=None):
     contracts = Contract.objects.all()
 
@@ -215,7 +235,7 @@ def all_contracts(request, tenant_name=None):
 
         return render(request,'contratos/all_contracts.html', {'contracts': contracts})
     
-
+@login_required(login_url='login/')
 def add_contract(request):
     if request.method == 'POST':
         form = ContractForm(request.POST)
@@ -262,7 +282,7 @@ def add_contract(request):
 
     return render(request, 'contratos/add_contract.html', {'form': form})
 
-
+@login_required(login_url='login/')
 def delete_contract(request, tenant_name):
     contract = get_object_or_404(Contract, nombre_arrendatario=tenant_name)
 
@@ -272,7 +292,7 @@ def delete_contract(request, tenant_name):
 
     return render(request, 'contratos/delete_contract.html', {'tenant': contract})
 
-
+@login_required(login_url='login/')
 def reminder(request):
     try:
         contract_info_html = []
@@ -313,3 +333,4 @@ def reminder(request):
         # Log the exception
         print(f"An error occurred: {e}")
         return HttpResponseServerError("Internal Server Error")
+
