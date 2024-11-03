@@ -47,7 +47,7 @@ class LoginPageView(EnvContextMixin, FormView):
             return self.form_invalid(form)
 
 
-class GeneratePDFsView(EnvContextMixin, FormView):
+class GeneratePDFsView(LoginRequiredMixin, EnvContextMixin, FormView):
     template_name = 'recibos/generate_pdfs.html'
     form_class = MonthForm
     success_url = reverse_lazy('pdf_generated')
@@ -76,16 +76,16 @@ class GeneratePDFsView(EnvContextMixin, FormView):
         send_emails(files, month)
         return super().form_valid(form)
 
-class PdfGeneratedView(EnvContextMixin, TemplateView):
+class PdfGeneratedView(LoginRequiredMixin, EnvContextMixin, TemplateView):
     template_name = 'recibos/pdf_generated.html'
 
 # -------------------------------------TENANTS-------------------------------------------------------------------
-class TenantListView(EnvContextMixin, ListView):
+class TenantListView(LoginRequiredMixin, EnvContextMixin, ListView):
     model = Tenant
     template_name = 'recibos/update_tenants.html'
     context_object_name = 'tenants'
 
-class UpdateTenantView(EnvContextMixin, UpdateView):
+class UpdateTenantView(LoginRequiredMixin, EnvContextMixin, UpdateView):
     model = Tenant
     form_class = TenantForm
     template_name = 'recibos/update_tenant.html'
@@ -101,10 +101,10 @@ class UpdateTenantView(EnvContextMixin, UpdateView):
         tenant.save()
         return super().form_valid(form)
 
-class UpdateSuccessView(EnvContextMixin, TemplateView):
+class UpdateSuccessView(LoginRequiredMixin, EnvContextMixin, TemplateView):
     template_name = 'recibos/update_success.html'
 
-class AddTenantView(EnvContextMixin, CreateView):
+class AddTenantView(LoginRequiredMixin, EnvContextMixin, CreateView):
     model = Tenant
     form_class = TenantForm
     template_name = 'recibos/add_tenant.html'
@@ -118,7 +118,7 @@ class AddTenantView(EnvContextMixin, CreateView):
         tenant.save()
         return super().form_valid(form)
 
-class DeleteTenantView(EnvContextMixin, DeleteView):
+class DeleteTenantView(LoginRequiredMixin, EnvContextMixin, DeleteView):
     model = Tenant
     template_name = 'recibos/delete_tenant.html'
     success_url = reverse_lazy('generate_pdfs')
@@ -127,12 +127,12 @@ class DeleteTenantView(EnvContextMixin, DeleteView):
     context_object_name = 'tenant'
 
 # ----------------------------------------CONTRACTS--------------------------------------------------------------
-class ContractListView(EnvContextMixin, ListView):
+class ContractListView(LoginRequiredMixin, EnvContextMixin, ListView):
     model = Contract
     template_name = 'contratos/all_contracts.html'
     context_object_name = 'contracts'
 
-class UpdateContractView(EnvContextMixin, UpdateView):
+class UpdateContractView(LoginRequiredMixin, EnvContextMixin, UpdateView):
     model = Contract
     form_class = ContractForm
     template_name = 'contratos/update_contract.html'
@@ -146,7 +146,7 @@ class UpdateContractView(EnvContextMixin, UpdateView):
         contract.save()
         return super().form_valid(form)
 
-class AddContractView(EnvContextMixin, CreateView):
+class AddContractView(LoginRequiredMixin, EnvContextMixin, CreateView):
     model = Contract
     form_class = ContractForm
     template_name = 'contratos/add_contract.html'
@@ -160,7 +160,7 @@ class AddContractView(EnvContextMixin, CreateView):
         contract.save()
         return super().form_valid(form)
 
-class DeleteContractView(EnvContextMixin, DeleteView):
+class DeleteContractView(LoginRequiredMixin, EnvContextMixin, DeleteView):
     model = Contract
     template_name = 'contratos/delete_contract.html'
     success_url = reverse_lazy('generate_pdfs')
