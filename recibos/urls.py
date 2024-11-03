@@ -1,20 +1,23 @@
-
 from django.urls import path
-from .views import *
+from .views import (
+    LoginPageView, GeneratePDFsView, TenantListView, UpdateTenantView,
+    AddTenantView, DeleteTenantView, ContractListView, UpdateContractView,
+    AddContractView, DeleteContractView, ReminderView, UpdateSuccessView,
+    PdfGeneratedView
+)
 
 urlpatterns = [
-    # ... your other URL patterns
-    path('', generate_pdfs, name='generate_pdfs'),
-    path('login/', login_page, name='login'),
-    path('update_tenants/', update_tenants, name='update_tenants'),
-    path('update/<str:tenant_name>/', update_tenants, name='update_tenant'),
-    path('update_success/', update_success, name='update_success'),
-    path('add/', add_tenant, name='add_tenant'),
-    path('<str:tenant_name>/delete/', delete_tenant, name='delete_tenant'),
-    path('contracts/all-contracts/', all_contracts, name='all_contracts'),
-    path('contracts/update/<str:tenant_name>/', all_contracts, name='update_contract'),
-    path('contracts/add/', add_contract, name='add_contract'),
-    path('contracts/<str:tenant_name>/delete/', delete_contract, name='delete_contract'),
-    path('contracts/update_success/', contracts_update_success, name='contracts_update_success'),
-    path('contracts/reminder/', reminder, name='reminder'),
+    path('', GeneratePDFsView.as_view(), name='generate_pdfs'),
+    path('pdf_generated/', PdfGeneratedView.as_view(), name='pdf_generated'),
+    path('login/', LoginPageView.as_view(), name='login'),
+    path('update_tenants/', TenantListView.as_view(), name='update_tenants'),
+    path('update/<str:tenant_name>/', UpdateTenantView.as_view(), name='update_tenant'),
+    path('update_success/', UpdateSuccessView.as_view(), name='update_success'),
+    path('add/', AddTenantView.as_view(), name='add_tenant'),
+    path('<str:tenant_name>/delete/', DeleteTenantView.as_view(), name='delete_tenant'),
+    path('contracts/all-contracts/', ContractListView.as_view(), name='all_contracts'),
+    path('contracts/update/<str:tenant_name>/', UpdateContractView.as_view(), name='update_contract'),
+    path('contracts/add/', AddContractView.as_view(), name='add_contract'),
+    path('contracts/<str:tenant_name>/delete/', DeleteContractView.as_view(), name='delete_contract'),
+    path('contracts/reminder/', ReminderView.as_view(), name='reminder'),
 ]
