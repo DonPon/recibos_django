@@ -1,323 +1,188 @@
+import os
 import time
-from .src.src_email import *
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Tenant, Contract
-from .forms import *
 import datetime
-from .src.src_pdf_utils import *
-from .src.src_dates import *
-from django.http import HttpResponseServerError
-from num2words import num2words
+from django.shortcuts import redirect, get_object_or_404
+from django.http import HttpResponse, HttpResponseServerError
+from django.urls import reverse_lazy
+from django.views.generic import FormView, TemplateView, ListView, DetailView
+from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.mixins import LoginRequiredMixin
 from dotenv import load_dotenv
-from django.contrib.auth.decorators import login_required
+from num2words import num2words
+
+from .models import Tenant, Contract
+from .forms import LoginForm, MonthForm, TenantForm, ContractForm
+from .src.src_email import send_email
+from .src.src_pdf_utils import create_pdf_email, send_emails
+from .src.src_dates import parse_date_string, flag_one_month_to_date
+from django.views.generic.base import ContextMixin
 
 load_dotenv()
-ENV = os.getenv('ENV')
+
+from django.views.generic.base import ContextMixin
+
+class EnvContextMixin(ContextMixin):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ENV'] = os.getenv('ENV')
+        return context
 
 
-def login_page(request):
-    form = LoginForm()
-    message = ''
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            user = authenticate(
-                username=form.cleaned_data['username'],
-                password=form.cleaned_data['password'],
-            )
-            if user is not None:
-                login(request, user)
-                message = f'Hola {user.username}!'
-                return redirect('generate_pdfs')
-            else:
-                message = 'Contraseña incorrecta.'
-    return render(
-        request, 'authentication/login.html', context={'form': form, 'message': message, 'ENV':ENV})
+class LoginPageView(EnvContextMixin, FormView):
+    template_name = 'authentication/login.html'
+    form_class = LoginForm
+    success_url = reverse_lazy('generate_pdfs')
 
-@login_required(login_url='login/')
-def generate_pdfs(request):
-    if request.method == 'POST':
-        form = MonthForm(request.POST)
-        if form.is_valid():
-            month = form.cleaned_data['month']
-            current_year = datetime.datetime.now().year
-
-            tenants = Tenant.objects.all()
-            files = []
-            for tenant in tenants:
-                day = tenant.dia
-                price = tenant.precio
-                # price_letters = tenant.precio_en_letra
-                price_letters = num2words(price.split('.')[0].replace(',',''), lang='es')
-                servicios = tenant.servicios
-                local = tenant.local
-
-                subject = f"CDMX, a {day} de {month.lower()}\nde {current_year}"
-                text = f"Recibí de parte del SR. {(tenant.name).upper()}, la cantidad de ${price} ({price_letters.upper()} PESOS 00/100 M.N.), " \
-                    f"por concepto de {servicios.lower()} del local {local}, del inmueble ubicado en Calle Noche de Paz # 14 Colonia Granjas Navidad, " \
-                    f"Delegación Cuajimalpa, C.P. 05219, correspondiente al mes de {month.upper()} de {current_year}."
-
-                # Create and save the PDF (replace with your PDF creation logic)
-                #create_pdf(subject, text, month, tenant.name)
-                #file_path = create_pdf_reportlab(subject, text, month, tenant.name)
-                file_path =  create_pdf_email(subject, text, month, tenant.name)
-                files.append(file_path)
-
-            time.sleep(1)
-            send_emails(files, month)
-
-
-                #response = create_pdf_download(request, subject, text, month, tenant.name)
-
-            return render(request, 'recibos/pdf_generated.html', {'month': month, 'ENV':ENV})
-
-    else:
-        form = MonthForm()
-
-    return render(request, 'recibos/generate_pdfs.html', {'form': form, 'ENV':ENV})
-
-@login_required(login_url='login/')
-def update_tenants(request, tenant_name=None):
-    tenants = Tenant.objects.all()
-
-    if tenant_name:
-        # Get the tenant instance
-        tenant = Tenant.objects.get(name=tenant_name)
-
-        if request.method == 'POST':
-            form = TenantForm(request.POST, instance=tenant)
-            if form.is_valid():
-                # Save the changes
-                form.save()
-
-
-                if not ',' in tenant.precio:
-                    tenant.precio = "{:,.2f}".format(float(tenant.precio))
-
-                elif ',' in tenant.precio:
-                    precio_temp = tenant.precio
-                    tenant.precio = "{:,.2f}".format(float(precio_temp.replace(',','')))
-
-                tenant.servicios = tenant.servicios.lower()
-
-                """tenant.precio_en_letra = tenant.precio_en_letra.upper()
-                if 'PESOS' in tenant.precio_en_letra:
-                    tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')"""
-
-                tenant.save()
-
-                return redirect('update_success')  # Redirect to a success page
+    def form_valid(self, form):
+        user = authenticate(
+            username=form.cleaned_data['username'],
+            password=form.cleaned_data['password'],
+        )
+        if user is not None:
+            login(self.request, user)
+            return super().form_valid(form)
         else:
-            # Transform data before rendering the form
-            # tenant.name = tenant.name.upper()
-            # tenant.precio_en_letra = tenant.precio_en_letra.upper()
-            # tenant.servicios = tenant.servicios.lower()
-            # if 'PESOS' in tenant.precio_en_letra:
-            #    tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')
-
-            # if not '.00' in tenant.precio:
-            #     tenant.precio = f'{tenant.precio}.00'
-
-            # tenant.save()
-
-            form = TenantForm(instance=tenant)
-
-        return render(request, 'recibos/update_tenant.html', {'form': form, 'editing_tenant': tenant, 'ENV':ENV})
-    else:
-        # Display the list of tenants
-        return render(request, 'recibos/update_tenants.html', {'tenants': tenants, 'ENV':ENV})
-
-@login_required(login_url='login/')
-def update_success(request):
-    return render(request, 'recibos/update_success.html')
-
-@login_required(login_url='login/')
-def contracts_update_success(request):
-    return render(request, 'contratos/update_success.html')
-
-@login_required(login_url='login/')
-def add_tenant(request):
-    if request.method == 'POST':
-        form = TenantForm(request.POST)
-
-        if form.is_valid():
-            # Transform data before saving
-            name = form.cleaned_data['name'].upper()
-            # precio_en_letra = form.cleaned_data['precio_en_letra'].upper()
-            servicios = form.cleaned_data['servicios'].lower()
-            local = form.cleaned_data['local']
-            dia = form.cleaned_data['dia']
-            precio = form.cleaned_data['precio']
-
-            """if 'PESOS' in precio_en_letra:
-                precio_en_letra = precio_en_letra.replace('PESOS', '')"""
+            form.add_error(None, 'Contraseña incorrecta.')
+            return self.form_invalid(form)
 
 
-            precio = "{:,.2f}".format(float(precio.replace(',','')))
+class GeneratePDFsView(EnvContextMixin, FormView):
+    template_name = 'recibos/generate_pdfs.html'
+    form_class = MonthForm
+    success_url = reverse_lazy('pdf_generated')
+
+    def form_valid(self, form):
+        month = form.cleaned_data['month']
+        current_year = datetime.datetime.now().year
+        tenants = Tenant.objects.all()
+        files = []
+
+        for tenant in tenants:
+            day = tenant.dia
+            price = tenant.precio
+            price_letters = num2words(price.split('.')[0].replace(',', ''), lang='es')
+            servicios = tenant.servicios
+            local = tenant.local
+            subject = f"CDMX, a {day} de {month.lower()}\nde {current_year}"
+            text = f"Recibí de parte del SR. {(tenant.name).upper()}, la cantidad de ${price} ({price_letters.upper()} PESOS 00/100 M.N.), " \
+                   f"por concepto de {servicios.lower()} del local {local}, del inmueble ubicado en Calle Noche de Paz # 14 Colonia Granjas Navidad, " \
+                   f"Delegación Cuajimalpa, C.P. 05219, correspondiente al mes de {month.upper()} de {current_year}."
+
+            file_path = create_pdf_email(subject, text, month, tenant.name)
+            files.append(file_path)
+
+        time.sleep(1)
+        send_emails(files, month)
+        return super().form_valid(form)
+
+class PdfGeneratedView(EnvContextMixin, TemplateView):
+    template_name = 'recibos/pdf_generated.html'
+
+# -------------------------------------TENANTS-------------------------------------------------------------------
+class TenantListView(EnvContextMixin, ListView):
+    model = Tenant
+    template_name = 'recibos/update_tenants.html'
+    context_object_name = 'tenants'
+
+class UpdateTenantView(EnvContextMixin, UpdateView):
+    model = Tenant
+    form_class = TenantForm
+    template_name = 'recibos/update_tenant.html'
+    success_url = reverse_lazy('update_success')
+    context_object_name = 'editing_tenant'
+    slug_field = 'name'  # Tell Django to use 'name' field for lookup
+    slug_url_kwarg = 'tenant_name'  # Match 'tenant_name' in the URL to 'name'
+
+    def form_valid(self, form):
+        tenant = form.save(commit=False)
+        tenant.precio = "{:,.2f}".format(float(tenant.precio.replace(',', '')))
+        tenant.servicios = tenant.servicios.lower()
+        tenant.save()
+        return super().form_valid(form)
+
+class UpdateSuccessView(EnvContextMixin, TemplateView):
+    template_name = 'recibos/update_success.html'
+
+class AddTenantView(EnvContextMixin, CreateView):
+    model = Tenant
+    form_class = TenantForm
+    template_name = 'recibos/add_tenant.html'
+    success_url = reverse_lazy('update_tenants')
+
+    def form_valid(self, form):
+        tenant = form.save(commit=False)
+        tenant.name = tenant.name.upper()
+        tenant.servicios = tenant.servicios.lower()
+        tenant.precio = "{:,.2f}".format(float(tenant.precio.replace(',', '')))
+        tenant.save()
+        return super().form_valid(form)
+
+class DeleteTenantView(EnvContextMixin, DeleteView):
+    model = Tenant
+    template_name = 'recibos/delete_tenant.html'
+    success_url = reverse_lazy('generate_pdfs')
+    slug_field = 'name'  # Specify the model field to use for lookup
+    slug_url_kwarg = 'tenant_name'  # Match this to the URL parameter
+    context_object_name = 'tenant'
+
+# ----------------------------------------CONTRACTS--------------------------------------------------------------
+class ContractListView(EnvContextMixin, ListView):
+    model = Contract
+    template_name = 'contratos/all_contracts.html'
+    context_object_name = 'contracts'
+
+class UpdateContractView(EnvContextMixin, UpdateView):
+    model = Contract
+    form_class = ContractForm
+    template_name = 'contratos/update_contract.html'
+    success_url = reverse_lazy('contracts_update_success')
+
+    def form_valid(self, form):
+        contract = form.save(commit=False)
+        contract.precio = "{:,.2f}".format(float(contract.precio.replace(',', '')))
+        contract.precio_en_letra = contract.precio_en_letra.upper()
+        contract.servicios = contract.servicios.lower()
+        contract.save()
+        return super().form_valid(form)
+
+class AddContractView(EnvContextMixin, CreateView):
+    model = Contract
+    form_class = ContractForm
+    template_name = 'contratos/add_contract.html'
+    success_url = reverse_lazy('all_contracts')
+
+    def form_valid(self, form):
+        contract = form.save(commit=False)
+        contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
+        contract.precio = "{:,.2f}".format(float(contract.precio.replace(',', '')))
+        contract.servicios = contract.servicios.lower()
+        contract.save()
+        return super().form_valid(form)
+
+class DeleteContractView(EnvContextMixin, DeleteView):
+    model = Contract
+    template_name = 'contratos/delete_contract.html'
+    success_url = reverse_lazy('generate_pdfs')
 
 
-            # Create a new instance of your model and set the fields
-            # precio_en_letra=precio_en_letra,
-            new_tenant = Tenant(
-                name=name,
-                servicios=servicios,
-                dia=dia,
-                precio=precio,
-                local=local
-                # Add other fields as needed
-            )
+class ReminderView(EnvContextMixin, TemplateView):
+    template_name = 'reminder.html'
 
-            # Save the new instance
-            new_tenant.save()
-            return redirect('update_tenants')  # Redirect to the same page after adding a tenant
-    else:
-        form = TenantForm()
-
-    return render(request, 'recibos/add_tenant.html', {'form': form})
-
-@login_required(login_url='login/')
-def delete_tenant(request, tenant_name):
-    tenant = get_object_or_404(Tenant, name=tenant_name)
-
-    if request.method == 'POST':
-        tenant.delete()
-        return redirect('generate_pdfs')  # Redirect to the home page or another appropriate page
-
-    return render(request, 'recibos/delete_tenant.html', {'tenant': tenant})
-
-@login_required(login_url='login/')
-def all_contracts(request, tenant_name=None):
-    contracts = Contract.objects.all()
-
-    if tenant_name:
-        # Get the tenant instance
-        contract = Contract.objects.get(nombre_arrendatario=tenant_name)
-
-        if request.method == 'POST':
-            form = ContractForm(request.POST, instance=contract)
-            if form.is_valid():
-                # Save the changes
-                form.save()
-                if not ',' in contract.precio:
-                    contract.precio = "{:,.2f}".format(float(contract.precio))
-
-                elif ',' in contract.precio:
-                    precio_temp = contract.precio
-                    contract.precio = "{:,.2f}".format(float(precio_temp.replace(',','')))
-
-                contract.precio_en_letra = contract.precio_en_letra.upper()
-                contract.servicios = contract.servicios.lower()
-                if 'PESOS' in contract.precio_en_letra:
-                    contract.precio_en_letra = contract.precio_en_letra.replace('PESOS', '')
-
-                contract.save()
-
-                return redirect('contracts_update_success')  # Redirect to a success page
-        else:
-            # Transform data before rendering the form
-            # tenant.name = tenant.name.upper()
-            # tenant.precio_en_letra = tenant.precio_en_letra.upper()
-            # tenant.servicios = tenant.servicios.lower()
-            # if 'PESOS' in tenant.precio_en_letra:
-            #    tenant.precio_en_letra = tenant.precio_en_letra.replace('PESOS', '')
-
-            # if not '.00' in tenant.precio:
-            #     tenant.precio = f'{tenant.precio}.00'
-
-            # tenant.save()
-
-            form = ContractForm(instance=contract)
-
-        return render(request, 'contratos/update_contract.html', {'form': form, 'editing_tenant': contract})
-    else:
-        # Display the list of tenants
-
-        return render(request,'contratos/all_contracts.html', {'contracts': contracts})
-    
-@login_required(login_url='login/')
-def add_contract(request):
-    if request.method == 'POST':
-        form = ContractForm(request.POST)
-
-        if form.is_valid():
-            # Transform data before saving
-            nombre_arrendatario = form.cleaned_data['nombre_arrendatario'].upper()
-            ine_arrendatario = form.cleaned_data['ine_arrendatario'].upper()
-            precio_en_letra = form.cleaned_data['precio_en_letra'].upper()
-            servicios = form.cleaned_data['servicios'].lower()
-            local = form.cleaned_data['local']
-            dia_de_pago = form.cleaned_data['dia_de_pago']
-            fecha_inicio_contrato = form.cleaned_data['fecha_inicio_contrato']
-            fecha_vencimiento_contrato = form.cleaned_data['fecha_vencimiento_contrato']
-            precio = form.cleaned_data['precio']
-
-
-            if 'PESOS' in precio_en_letra:
-                precio_en_letra = precio_en_letra.replace('PESOS', '')
-
-
-            precio = "{:,.2f}".format(float(precio.replace(',','')))
-
-
-            # Create a new instance of your model and set the fields
-            new_contract = Contract(
-                nombre_arrendatario=nombre_arrendatario,
-                ine_arrendatario=ine_arrendatario,
-                precio_en_letra=precio_en_letra,
-                servicios=servicios,
-                dia_de_pago=dia_de_pago,
-                precio=precio,
-                fecha_inicio_contrato=fecha_inicio_contrato,
-                fecha_vencimiento_contrato=fecha_vencimiento_contrato,
-                local=local
-                # Add other fields as needed
-            )
-
-            # Save the new instance
-            new_contract.save()
-            return redirect('all_contracts')  # Redirect to the same page after adding a tenant
-    else:
-        form = ContractForm()
-
-    return render(request, 'contratos/add_contract.html', {'form': form})
-
-@login_required(login_url='login/')
-def delete_contract(request, tenant_name):
-    contract = get_object_or_404(Contract, nombre_arrendatario=tenant_name)
-
-    if request.method == 'POST':
-        contract.delete()
-        return redirect('generate_pdfs')  # Redirect to the home page or another appropriate page
-
-    return render(request, 'contratos/delete_contract.html', {'tenant': contract})
-
-@login_required(login_url='login/')
-def reminder(request):
-    try:
+    def get(self, request, *args, **kwargs):
         contract_info_html = []
         contracts = Contract.objects.all()
+
         for contract in contracts:
             vencimiento = parse_date_string(contract.fecha_vencimiento_contrato)
-            #print(f"vencimiento: {vencimiento}")
-            flag = flag_one_month_to_date(vencimiento)
-            print(flag)
-            if flag:               
-                import textwrap
-                body = textwrap.dedent(f"""
-                    Hola,
-                    El siguiente contrato está próximo a vencer en 15 días:
-                    
-                    Arrendatario: {contract.nombre_arrendatario}
-                    Vencimiento: {contract.fecha_vencimiento_contrato}
-                    Local: {contract.local}
-                    Monto renta: ${contract.precio}
-
-                    Puedes renovarlo aqui: https://recibos-django.onrender.com/contracts/all-contracts/
-
-                    © 2024 Franz Eckermann
-                """)
-                send_email("Próximo Vencimiento de Contrato",body)
+            if flag_one_month_to_date(vencimiento):
+                body = f"Hola,\n\nEl siguiente contrato está próximo a vencer en 15 días:\n\n" \
+                       f"Arrendatario: {contract.nombre_arrendatario}\n" \
+                       f"Vencimiento: {contract.fecha_vencimiento_contrato}\n" \
+                       f"Local: {contract.local}\n" \
+                       f"Monto renta: ${contract.precio}\n\n" \
+                       f"Puedes renovarlo aquí: https://recibos-django.onrender.com/contracts/all-contracts/"
+                send_email("Próximo Vencimiento de Contrato", body)
 
             contract_info_html.append(f"""
                 <p>Arrendatario: {contract.nombre_arrendatario}</p>
@@ -328,9 +193,4 @@ def reminder(request):
                 <hr>
             """)
         return HttpResponse("".join(contract_info_html))
-    
-    except Exception as e:
-        # Log the exception
-        print(f"An error occurred: {e}")
-        return HttpResponseServerError("Internal Server Error")
 
