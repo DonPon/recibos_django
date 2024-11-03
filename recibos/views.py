@@ -20,7 +20,6 @@ from django.views.generic.base import ContextMixin
 
 load_dotenv()
 
-from django.views.generic.base import ContextMixin
 
 class EnvContextMixin(ContextMixin):
     def get_context_data(self, **kwargs):
