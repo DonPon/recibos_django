@@ -317,6 +317,50 @@ def create_pdf_reportlab(subject, text, month, name):
     # Create the FileResponse object.
     return FileResponse(buffer, as_attachment=True, filename=filename)
 
+def create_contract_pdf(text):
+    contract, signatures = constructor_contract()
+
+    class MyPDF(FPDF):
+        def header(self):
+            # Your header implementation here (if any)
+            pass
+
+        def footer(self):
+            # Set font for the footer
+            self.set_font('Helvetica', 'I', 10)
+
+            # Position at 15 mm from bottom
+            self.set_y(-15)
+
+            # Add a page number as a footnote
+            footnote_text = f"{self.page_no()}"
+            self.cell(0, 10, footnote_text, 0, 0, 'R')
+
+    # Create a new PDF document.
+    pdf = MyPDF(format='Legal')
+    # Set slightly larger margins
+    pdf.set_margins(left=30, top=15, right=30)
+    # Add a new page.
+    pdf.add_page()
+    # Reset font for body text
+    pdf.set_font('Helvetica', '', 12)
+
+    for item in contract:
+        if '%TITLE%' in item:
+            pdf.cell(0, 6, item.replace('%TITLE%', ''), align='C', markdown=True)
+            pdf.ln(2)
+        else:
+            pdf.multi_cell(0, 6, item, align='J', markdown=True)
+
+    with pdf.table(text_align="CENTER") as table:
+        for data_row in signatures:
+            row = table.row()
+            for datum in data_row:
+                row.cell(datum)
+
+    filename = f"sample_contrato.pdf"
+    pdf.output(name=filename)
+    return filename
 
 #tenant1 = Tenant(name='JOSE ANTONIO HURTADO LOPEZ', dia='01', precio='6,580.00', precio_en_letra='SEIS MIL QUINIENTOS OCHENTA', servicios='renta y mantenimiento', local='26-C')
 #tenant2 = Tenant(name='IRWING ARTURO PEÑA VARGAS', dia='15', precio='10,500.00', precio_en_letra='DIEZ MIL QUINIENTOS', servicios='renta', local='5-B')

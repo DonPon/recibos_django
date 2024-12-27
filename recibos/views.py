@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from num2words import num2words
 
 from .models import Tenant, Contract
-from .forms import LoginForm, MonthForm, TenantForm, ContractForm
+from .forms import LoginForm, MonthForm, TenantForm, LocalComercialForm, DepartamentoForm
 from .src.src_email import send_email
 from .src.src_pdf_utils import create_pdf_email, send_emails
 from .src.src_dates import parse_date_string, flag_one_month_to_date
@@ -133,29 +133,87 @@ class ContractListView(LoginRequiredMixin, EnvContextMixin, ListView):
 
 class UpdateContractView(LoginRequiredMixin, EnvContextMixin, UpdateView):
     model = Contract
-    form_class = ContractForm
+    form_class = LocalComercialForm
     template_name = 'contratos/update_contract.html'
+    pk_url_kwarg = 'id'
     success_url = reverse_lazy('contracts_update_success')
+
+    def get_form_class(self):
+        contract_type = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
+        if contract_type == 'local_comercial':
+            return LocalComercialForm
+        elif contract_type == 'departamento':
+            return DepartamentoForm
+        return LocalComercialForm  # Default form if type is not specified
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contract_type'] = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
+        return context
 
     def form_valid(self, form):
         contract = form.save(commit=False)
-        contract.precio = "{:,.2f}".format(float(contract.precio.replace(',', '')))
-        contract.precio_en_letra = contract.precio_en_letra.upper()
-        contract.servicios = contract.servicios.lower()
+        contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
+
+        contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
+        contract.ine_arrendatario = contract.ine_arrendatario.upper()
+        contract.curp_arrendatario = contract.curp_arrendatario.upper()
+        contract.celular_arrendatario = contract.celular_arrendatario
+
+        contract.fecha_inicio_contrato = contract.fecha_inicio_contrato
+        contract.fecha_vencimiento_contrato = contract.fecha_vencimiento_contrato
+
+
+        contract.renta = "{:,.2f}".format(float(contract.renta.replace(',', '')))
+        contract.iva = "{:,.2f}".format(float(contract.iva.replace(',', '')))
+        contract.total = "{:,.2f}".format(float(contract.total.replace(',', '')))
+        contract.deposito = "{:,.2f}".format(float(contract.deposito.replace(',', '')))
+        contract.mantenimiento = "{:,.2f}".format(float(contract.mantenimiento.replace(',', '')))
+
+        contract.dia_de_pago = contract.dia_de_pago
         contract.save()
         return super().form_valid(form)
 
 class AddContractView(LoginRequiredMixin, EnvContextMixin, CreateView):
     model = Contract
-    form_class = ContractForm
+    #form_class = ContractForm
     template_name = 'contratos/add_contract.html'
     success_url = reverse_lazy('all_contracts')
+
+    def get_form_class(self):
+        contract_type = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
+        if contract_type == 'local_comercial':
+            return LocalComercialForm
+        elif contract_type == 'departamento':
+            return DepartamentoForm
+        return LocalComercialForm  # Default form if type is not specified
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contract_type'] = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
+        return context
 
     def form_valid(self, form):
         contract = form.save(commit=False)
         contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
-        contract.precio = "{:,.2f}".format(float(contract.precio.replace(',', '')))
-        contract.servicios = contract.servicios.lower()
+
+        contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
+        contract.ine_arrendatario = contract.ine_arrendatario.upper()
+        contract.curp_arrendatario = contract.curp_arrendatario.upper()
+        contract.celular_arrendatario = contract.celular_arrendatario
+
+        contract.fecha_inicio_contrato = contract.fecha_inicio_contrato
+        contract.fecha_vencimiento_contrato = contract.fecha_vencimiento_contrato
+
+
+        contract.renta = "{:,.2f}".format(float(contract.renta.replace(',', '')))
+        contract.iva = "{:,.2f}".format(float(contract.iva.replace(',', '')))
+        contract.total = "{:,.2f}".format(float(contract.total.replace(',', '')))
+        contract.deposito = "{:,.2f}".format(float(contract.deposito.replace(',', '')))
+        contract.mantenimiento = "{:,.2f}".format(float(contract.mantenimiento.replace(',', '')))
+
+        contract.dia_de_pago = contract.dia_de_pago
+
         contract.save()
         return super().form_valid(form)
 
@@ -163,6 +221,7 @@ class DeleteContractView(LoginRequiredMixin, EnvContextMixin, DeleteView):
     model = Contract
     template_name = 'contratos/delete_contract.html'
     success_url = reverse_lazy('generate_pdfs')
+    pk_url_kwarg = 'id'
 
 
 class ReminderView(EnvContextMixin, TemplateView):
@@ -179,7 +238,7 @@ class ReminderView(EnvContextMixin, TemplateView):
                        f"Arrendatario: {contract.nombre_arrendatario}\n" \
                        f"Vencimiento: {contract.fecha_vencimiento_contrato}\n" \
                        f"Local: {contract.local}\n" \
-                       f"Monto renta: ${contract.precio}\n\n" \
+                       f"Monto renta: ${contract.renta}\n\n" \
                        f"Puedes renovarlo aquí: https://recibos-django.onrender.com/contracts/all-contracts/"
                 send_email("Próximo Vencimiento de Contrato", body)
 
@@ -187,7 +246,7 @@ class ReminderView(EnvContextMixin, TemplateView):
                 <p>Arrendatario: {contract.nombre_arrendatario}</p>
                 <p>Vencimiento: {contract.fecha_vencimiento_contrato}</p>
                 <p>Local: {contract.local}</p>
-                <p>Monto renta: ${contract.precio}</p>
+                <p>Monto renta: ${contract.renta}</p>
                 <p>Puedes renovarlo aquí: <a href="https://recibos-django.onrender.com/contracts/all-contracts/">Renovar Contrato</a></p>
                 <hr>
             """)

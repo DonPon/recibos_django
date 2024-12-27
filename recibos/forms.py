@@ -12,11 +12,41 @@ class TenantForm(forms.ModelForm):
         fields = ['name', 'dia', 'precio', 'servicios', 'local']
         # fields = ['name', 'dia', 'precio', 'precio_en_letra', 'servicios', 'local']
 
-class ContractForm(forms.ModelForm):
+# class ContractForm(forms.ModelForm):
+#     class Meta:
+#         model = Contract
+#         fields = [
+#             'nombre_arrendatario',
+#             'ine_arrendatario',
+#             'curp_arrendatario',
+#             'celular_arrendatario',
+#             'fecha_inicio_contrato',
+#             'fecha_vencimiento_contrato',
+#             'renta',
+#             'iva',
+#             'total',
+#             'deposito',
+#             'mantenimiento',
+#             'dia_de_pago',
+#             'local'
+#         ]
+
+class BaseContractForm(forms.ModelForm):
     class Meta:
         model = Contract
-        fields = ['nombre_arrendatario', 'ine_arrendatario', 'fecha_inicio_contrato', 
-                  'fecha_vencimiento_contrato', 'dia_de_pago', 'precio','precio_en_letra','servicios','local']
+        fields = '__all__'
+
+class LocalComercialForm(BaseContractForm):
+    class Meta(BaseContractForm.Meta):
+        labels = {
+            'local': 'Local',
+        }
+
+class DepartamentoForm(BaseContractForm):
+    class Meta(BaseContractForm.Meta):
+        labels = {
+            'local': 'Departamento',
+        }
 
 # authentication/forms.py
 from django import forms

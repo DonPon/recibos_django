@@ -53,11 +53,24 @@
                 <h3 class="card-title">Nuevo Contrato</h3>
             </div>
             <div class="card-body">
+
+                {% if not contract_type %}
+                <div id="contract-selection">
+                    <h2>Seleccione el tipo de contrato:</h2>
+                    <form method="get" action="">
+                        <button type="submit" name="contract_type" value="local_comercial" class="btn btn-primary btn-block">Local Comercial</button>
+                        <button type="submit" name="contract_type" value="departamento" class="btn btn-primary btn-block">Departamento</button>
+                    </form>
+                </div>
+                {% endif %}
+
+                {% if contract_type %}
                 <form method="post" action="{% url 'add_contract' %}">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <button type="submit" class="btn btn-success btn-block">Guardar</button>
                 </form>
+                {% endif %}
                 <br>
                 <a href="{% url 'all_contracts' %}" class="btn btn-secondary btn-block">← Cancelar</a>
             </div>
