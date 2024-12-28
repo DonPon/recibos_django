@@ -42,11 +42,19 @@ class LocalComercialForm(BaseContractForm):
             'local': 'Local',
         }
 
+    def __init__(self, *args, **kwargs):
+        super(LocalComercialForm, self).__init__(*args, **kwargs)
+        self.fields['contract_type'].initial = 'local_comercial'
+
 class DepartamentoForm(BaseContractForm):
     class Meta(BaseContractForm.Meta):
         labels = {
             'local': 'Departamento',
         }
+    
+    def __init__(self, *args, **kwargs):
+        super(DepartamentoForm, self).__init__(*args, **kwargs)
+        self.fields['contract_type'].initial = 'departamento'
 
 # authentication/forms.py
 from django import forms

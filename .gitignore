@@ -6,3 +6,18 @@ recibos/src/__pycache__/
 
 # Ignore the .env file
 .env
+
+# Ignore the .vscode folder
+.vscode/
+
+# Ignore the .idea folder
+.idea/
+
+# Ignore PDF files
+*.pdf
+
+# Ignore database files
+*.db
+
+# Ignore all __pycache__ folders
+**/__pycache__/

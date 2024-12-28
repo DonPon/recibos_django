@@ -97,6 +97,7 @@
             <h6>
                 <span class="bold-label">Renta:</span> ${{ tenant.renta }} MXN
             </h6>
+            <a href="{% url 'create_contract_pdf' contract_id=tenant.id %}" class="btn btn-secondary">Descagar copia contrato</a>
             <div class="row">
                 <div class="col-md-6"></div>
                 <div class="col-md-6">

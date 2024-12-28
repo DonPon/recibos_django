@@ -14,7 +14,7 @@ from num2words import num2words
 from .models import Tenant, Contract
 from .forms import LoginForm, MonthForm, TenantForm, LocalComercialForm, DepartamentoForm
 from .src.src_email import send_email
-from .src.src_pdf_utils import create_pdf_email, send_emails
+from .src.src_pdf_utils import create_pdf_email, send_emails, create_contract_pdf
 from .src.src_dates import parse_date_string, flag_one_month_to_date
 from django.views.generic.base import ContextMixin
 
@@ -131,6 +131,15 @@ class ContractListView(LoginRequiredMixin, EnvContextMixin, ListView):
     template_name = 'contratos/all_contracts.html'
     context_object_name = 'contracts'
 
+    def get(self, request, *args, **kwargs):
+        if 'download_contract' in request.GET:
+            tenant_name = request.GET.get('tenant_name')
+            contract = get_object_or_404(Contract, nombre_arrendatario=tenant_name)
+            # logic to generate and return the PDF file
+            create_contract_pdf(item_dict=contract)
+            return
+        return super().get(request, *args, **kwargs)
+
 class UpdateContractView(LoginRequiredMixin, EnvContextMixin, UpdateView):
     model = Contract
     form_class = LocalComercialForm
@@ -154,22 +163,17 @@ class UpdateContractView(LoginRequiredMixin, EnvContextMixin, UpdateView):
     def form_valid(self, form):
         contract = form.save(commit=False)
         contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
-
         contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
         contract.ine_arrendatario = contract.ine_arrendatario.upper()
         contract.curp_arrendatario = contract.curp_arrendatario.upper()
         contract.celular_arrendatario = contract.celular_arrendatario
-
         contract.fecha_inicio_contrato = contract.fecha_inicio_contrato
         contract.fecha_vencimiento_contrato = contract.fecha_vencimiento_contrato
-
-
         contract.renta = "{:,.2f}".format(float(contract.renta.replace(',', '')))
         contract.iva = "{:,.2f}".format(float(contract.iva.replace(',', '')))
         contract.total = "{:,.2f}".format(float(contract.total.replace(',', '')))
         contract.deposito = "{:,.2f}".format(float(contract.deposito.replace(',', '')))
         contract.mantenimiento = "{:,.2f}".format(float(contract.mantenimiento.replace(',', '')))
-
         contract.dia_de_pago = contract.dia_de_pago
         contract.save()
         return super().form_valid(form)
@@ -182,11 +186,14 @@ class AddContractView(LoginRequiredMixin, EnvContextMixin, CreateView):
 
     def get_form_class(self):
         contract_type = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
+        self.contract_type = contract_type
         if contract_type == 'local_comercial':
             return LocalComercialForm
         elif contract_type == 'departamento':
             return DepartamentoForm
-        return LocalComercialForm  # Default form if type is not specified
+        return LocalComercialForm
+        
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -195,26 +202,22 @@ class AddContractView(LoginRequiredMixin, EnvContextMixin, CreateView):
 
     def form_valid(self, form):
         contract = form.save(commit=False)
-        contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
-
+        contract.contract_type = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
         contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
         contract.ine_arrendatario = contract.ine_arrendatario.upper()
         contract.curp_arrendatario = contract.curp_arrendatario.upper()
         contract.celular_arrendatario = contract.celular_arrendatario
-
         contract.fecha_inicio_contrato = contract.fecha_inicio_contrato
         contract.fecha_vencimiento_contrato = contract.fecha_vencimiento_contrato
-
-
         contract.renta = "{:,.2f}".format(float(contract.renta.replace(',', '')))
         contract.iva = "{:,.2f}".format(float(contract.iva.replace(',', '')))
         contract.total = "{:,.2f}".format(float(contract.total.replace(',', '')))
         contract.deposito = "{:,.2f}".format(float(contract.deposito.replace(',', '')))
         contract.mantenimiento = "{:,.2f}".format(float(contract.mantenimiento.replace(',', '')))
-
         contract.dia_de_pago = contract.dia_de_pago
-
         contract.save()
+        print(contract.__dict__)
+        create_contract_pdf(item_dict=contract.__dict__)
         return super().form_valid(form)
 
 class DeleteContractView(LoginRequiredMixin, EnvContextMixin, DeleteView):
@@ -222,6 +225,21 @@ class DeleteContractView(LoginRequiredMixin, EnvContextMixin, DeleteView):
     template_name = 'contratos/delete_contract.html'
     success_url = reverse_lazy('generate_pdfs')
     pk_url_kwarg = 'id'
+
+
+class CreateContractPDFView(LoginRequiredMixin, EnvContextMixin, TemplateView):
+    template_name = 'contratos/pdf_generated.html'
+
+    def get(self, request, *args, **kwargs):
+        contract_id = kwargs.get('contract_id')
+        contract = Contract.objects.filter(id=contract_id).values().first()
+        create_contract_pdf(item_dict=contract)
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contract_id'] = kwargs.get('contract_id')
+        return context
 
 
 class ReminderView(EnvContextMixin, TemplateView):

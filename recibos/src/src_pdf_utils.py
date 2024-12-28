@@ -2,6 +2,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.files import File
 import fpdf
+
 import datetime
 #import yaml
 import os
@@ -16,6 +17,7 @@ from email import encoders
 from django.conf import settings
 import io
 from .src_email import *
+from .strings import constructor_contract
 
 
 def create_pdf(subject, text, month, name):
@@ -317,10 +319,10 @@ def create_pdf_reportlab(subject, text, month, name):
     # Create the FileResponse object.
     return FileResponse(buffer, as_attachment=True, filename=filename)
 
-def create_contract_pdf(text):
-    contract, signatures = constructor_contract()
+def create_contract_pdf(item_dict):
+    contract, signatures = constructor_contract(item_dict=item_dict)
 
-    class MyPDF(FPDF):
+    class MyPDF(fpdf.FPDF):
         def header(self):
             # Your header implementation here (if any)
             pass
@@ -347,7 +349,7 @@ def create_contract_pdf(text):
 
     for item in contract:
         if '%TITLE%' in item:
-            pdf.cell(0, 6, item.replace('%TITLE%', ''), align='C', markdown=True)
+            pdf.cell(0, 6, item.replace('%TITLE%', ''), align='C', markdown=True, center=True)
             pdf.ln(2)
         else:
             pdf.multi_cell(0, 6, item, align='J', markdown=True)
@@ -358,7 +360,7 @@ def create_contract_pdf(text):
             for datum in data_row:
                 row.cell(datum)
 
-    filename = f"sample_contrato.pdf"
+    filename = f"{datetime.datetime.now().strftime("%H_%M")}sample_contrato.pdf"
     pdf.output(name=filename)
     return filename
 
