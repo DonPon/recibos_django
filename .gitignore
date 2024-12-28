@@ -18,6 +18,8 @@ recibos/src/__pycache__/
 
 # Ignore database files
 *.db
+*.sqlite3
+
 
 # Ignore all __pycache__ folders
 **/__pycache__/
