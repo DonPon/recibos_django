@@ -19,8 +19,20 @@ smtp_port = 587
 smtp_username = from_email
 
 
-
 def send_email(subject,body,file_path=None):
+    def send_email(subject, body, file_path=None):
+        """
+        Sends an email with the specified subject and body. Optionally attaches a file.
+        Args:
+            subject (str): The subject of the email.
+            body (str): The body of the email.
+            file_path (str, optional): The path to the file to be attached. Defaults to None.
+        Raises:
+            FileNotFoundError: If the file specified in file_path does not exist.
+            smtplib.SMTPException: If there is an error sending the email.
+        Returns:
+            None
+        """
     # Create a multipart message
     message = MIMEMultipart()
     message['Subject'] = subject

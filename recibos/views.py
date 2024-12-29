@@ -14,7 +14,7 @@ from num2words import num2words
 from .models import Tenant, Contract
 from .forms import LoginForm, MonthForm, TenantForm, LocalComercialForm, DepartamentoForm
 from .src.src_email import send_email
-from .src.src_pdf_utils import create_pdf_email, send_emails, create_contract_pdf
+from .src.src_pdf_utils import create_recibo_pdf, send_emails_recibos, create_contract_pdf, send_emails_contracts
 from .src.src_dates import parse_date_string, flag_one_month_to_date
 from django.views.generic.base import ContextMixin
 
@@ -68,11 +68,11 @@ class GeneratePDFsView(LoginRequiredMixin, EnvContextMixin, FormView):
                    f"por concepto de {servicios.lower()} del local {local}, del inmueble ubicado en Calle Noche de Paz # 14 Colonia Granjas Navidad, " \
                    f"Delegación Cuajimalpa, C.P. 05219, correspondiente al mes de {month.upper()} de {current_year}."
 
-            file_path = create_pdf_email(subject, text, month, tenant.name)
+            file_path = create_recibo_pdf(subject, text, month, tenant.name)
             files.append(file_path)
 
         time.sleep(1)
-        send_emails(files, month)
+        send_emails_recibos(files, month)
         return super().form_valid(form)
 
 class PdfGeneratedView(LoginRequiredMixin, EnvContextMixin, TemplateView):
@@ -204,7 +204,7 @@ class AddContractView(LoginRequiredMixin, EnvContextMixin, CreateView):
         contract = form.save(commit=False)
         contract.contract_type = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
         contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
-        contract.ine_arrendatario = contract.ine_arrendatario.upper()
+        contract.ine_arrendatario = contract.identificacion_arrendatario.upper()
         contract.curp_arrendatario = contract.curp_arrendatario.upper()
         contract.celular_arrendatario = contract.celular_arrendatario
         contract.fecha_inicio_contrato = contract.fecha_inicio_contrato
@@ -217,7 +217,8 @@ class AddContractView(LoginRequiredMixin, EnvContextMixin, CreateView):
         contract.dia_de_pago = contract.dia_de_pago
         contract.save()
         print(contract.__dict__)
-        create_contract_pdf(item_dict=contract.__dict__)
+        contract_file_path = create_contract_pdf(item_dict=contract.__dict__)
+        send_emails_contracts(contract_file_path, contract.__dict__['nombre_arrendatario'])
         return super().form_valid(form)
 
 class DeleteContractView(LoginRequiredMixin, EnvContextMixin, DeleteView):
@@ -233,7 +234,9 @@ class CreateContractPDFView(LoginRequiredMixin, EnvContextMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         contract_id = kwargs.get('contract_id')
         contract = Contract.objects.filter(id=contract_id).values().first()
-        create_contract_pdf(item_dict=contract)
+        contract_file_path = create_contract_pdf(item_dict=contract)
+        send_emails_contracts(contract_file_path, contract['nombre_arrendatario'])
+
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):

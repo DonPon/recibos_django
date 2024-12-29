@@ -48,6 +48,7 @@ class LocalComercialForm(BaseContractForm):
 
 class DepartamentoForm(BaseContractForm):
     class Meta(BaseContractForm.Meta):
+        exclude = ['giro']
         labels = {
             'local': 'Departamento',
         }

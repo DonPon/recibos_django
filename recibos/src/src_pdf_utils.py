@@ -1,26 +1,21 @@
-from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.core.files import File
 import fpdf
-
 import datetime
-#import yaml
-import os
-import smtplib
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-from email.mime.base import MIMEBase
-from django.http import HttpResponse
-from email import encoders
-from django.conf import settings
-import io
 from .src_email import *
-from .strings import constructor_contract
+from .strings import constructor_contract_local_comercial, constructor_contract_departamento
 
 
-def create_pdf(subject, text, month, name):
+def create_recibo_pdf(subject, text, month, name):
+    """
+    Create a PDF document for an email receipt.
+    Args:
+        subject (str): The subject text to be included in the PDF.
+        text (str): The body text to be included in the PDF.
+        month (str): The month to be included in the filename.
+        name (str): The name to be included in the filename.
+    Returns:
+        str: The filename of the created PDF document.
+    """
     # Create a new PDF document.
     pdf = fpdf.FPDF(format='Letter')
 
@@ -65,163 +60,36 @@ def create_pdf(subject, text, month, name):
     # Add signature text
     pdf.set_font('Arial', '', 14)
     pdf.multi_cell(0, 8, f'SRA. GABRIELA SEGURA\nLEYVA', align='C')
-
-    # Save the document.
-    # Specify the folder path
-    folder_path = "C:/Users/4PF26LA_RS5/Desktop/Recibos/"
-    # Check if the folder exists
-    if not os.path.exists(folder_path):
-        # Create the folder if it doesn't exist
-        os.makedirs(folder_path)
-
-    filename = f"C:/Users/4PF26LA_RS5/Desktop/Recibos/Recibo_{month.upper()}_{name}.pdf"
-    pdf.output(filename)
-
-def create_pdf_download(request, subject, text, month, name):
-    # Create a new PDF document.
-    pdf = fpdf.FPDF(format='Letter')
-
-    # Set slightly larger margins
-    pdf.set_margins(left=30, top=30, right=30)
-
-    # Add a new page.
-    pdf.add_page()
-
-    # Set font for title
-    pdf.set_font('Arial', 'B', 20)
-
-    # Add the title text
-    pdf.cell(0, 8, 'RECIBO', align='C')
-
-    # Add a newline
-    pdf.ln(20)
-
-    # Reset font for body text
-    pdf.set_font('Arial', '', 14)
-
-    # Add the subject text
-    pdf.multi_cell(0, 8, subject, align='R')
-
-    # Add a newline
-    pdf.ln(20)
-
-    # Add the body text
-    pdf.multi_cell(0, 8, text, align='J')
-
-    # Add 5 new lines
-    for i in range(7):
-        pdf.ln(8)
-
-    # Draw a signature line
-    pdf.set_line_width(0.4)
-    pdf.line(pdf.get_x() + 35, pdf.get_y(), pdf.get_x() + 120, pdf.get_y())
-
-    # Add a newline
-    pdf.ln(1)
-
-    # Add signature text
-    pdf.set_font('Arial', '', 14)
-    pdf.multi_cell(0, 8, f'SRA. GABRIELA SEGURA\nLEYVA', align='C')
-
-    # Specify the folder path
-    folder_path = "C:/Users/4PF26LA_RS5/Desktop/Recibos/"
-
-    # Create the folder if it doesn't exist
-    #if not os.path.exists(folder_path):
-    #    os.makedirs(folder_path)
-
-    # Define the filename
-    filename = f"Recibo_{month.upper()}_{name}.pdf"
-
-    # Create the full filepath
-    filepath = os.path.join(folder_path, filename)
-
-    # Save the document
-    pdf.output(filename)
-
-    # Open the file for reading in binary mode
-    with open(filename, 'rb') as file:
-        # Create an HttpResponse with the file's content for download
-        response = HttpResponse(file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename={filename}'
-
-    # Delete the file
-    #os.remove(filename)
-
-    return filename
-
-def create_pdf_email(subject, text, month, name):
-    # Create a new PDF document.
-    pdf = fpdf.FPDF(format='Letter')
-
-    # Set slightly larger margins
-    pdf.set_margins(left=30, top=30, right=30)
-
-    # Add a new page.
-    pdf.add_page()
-
-    # Set font for title
-    pdf.set_font('Arial', 'B', 20)
-
-    # Add the title text
-    pdf.cell(0, 8, 'RECIBO', align='C')
-
-    # Add a newline
-    pdf.ln(20)
-
-    # Reset font for body text
-    pdf.set_font('Arial', '', 14)
-
-    # Add the subject text
-    pdf.multi_cell(0, 8, subject, align='R')
-
-    # Add a newline
-    pdf.ln(20)
-
-    # Add the body text
-    pdf.multi_cell(0, 8, text, align='J')
-
-    # Add 5 new lines
-    for i in range(7):
-        pdf.ln(8)
-
-    # Draw a signature line
-    pdf.set_line_width(0.4)
-    pdf.line(pdf.get_x() + 35, pdf.get_y(), pdf.get_x() + 120, pdf.get_y())
-
-    # Add a newline
-    pdf.ln(1)
-
-    # Add signature text
-    pdf.set_font('Arial', '', 14)
-    pdf.multi_cell(0, 8, f'SRA. GABRIELA SEGURA\nLEYVA', align='C')
-
-    # Specify the folder path
-    '''folder_path = "C:/Users/4PF26LA_RS5/Desktop/Recibos/"
-
-    # Create the folder if it doesn't exist
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)'''
 
     # Define the filename
     filename = f"Recibo_{month.upper()}_{name.upper()}.pdf"
-
-    # Create the full filepath using MEDIA_ROOT
-    #filepath = os.path.join(settings.MEDIA_ROOT, filename)
-    #pdf_content = ContentFile(pdf.output(name=filename))
     pdf.output(name=filename)
 
     return filename
 
-
-
-def send_emails(files, month):
+def send_emails_recibos(files, month):
+    """
+    Sends an email with the specified files as attachments for the given month.
+    Args:
+        files (list): List of file paths to be attached to the email.
+        month (str): The month for which the receipts are being sent.
+    Raises:
+        FileNotFoundError: If any of the files in the list do not exist.
+        smtplib.SMTPException: If there is an error sending the email.
+    Note:
+        This function assumes that the following variables are defined globally:
+        - from_email: The sender's email address.
+        - to_email: The recipient's email address.
+        - cc_email: The CC recipient's email address.
+        - smtp_server: The SMTP server address.
+        - smtp_port: The SMTP server port.
+        - smtp_username: The SMTP server username.
+        - smtp_password: The SMTP server password.
+        - default_storage: The storage system used to delete files.
+    """
     # Compose the email
     subject = f"Recibos {month.upper()}"
     body = f"Recibos para el mes de {month}"
-    #from_email = "projects.franz@gmail.com"
-    #to_email = "gabysurel@yahoo.com.mx"
-    #cc_email = "franzeckermann@gmail.com"
 
     # Create a multipart message
     message = MIMEMultipart()
@@ -246,13 +114,6 @@ def send_emails(files, month):
         # Attach the file to the email
         message.attach(attachment)
 
-    # Connect to the SMTP server and send the email
-    #smtp_server = 'smtp.gmail.com'
-    #smtp_port = 587
-    #smtp_username = 'projects.franz@gmail.com'
-    #smtp_password = 'ugcx uano rucc rdko'
-
-
     with smtplib.SMTP(smtp_server, smtp_port) as server:
         server.starttls()
         server.login(smtp_username, smtp_password)
@@ -266,61 +127,23 @@ def send_emails(files, month):
     for file_path_2 in files:
         os.remove(file_path_2)
 
-def create_pdf_reportlab(subject, text, month, name):
-    from django.http import FileResponse
-    from io import BytesIO
-    from reportlab.pdfgen import canvas
-    # Create a file-like buffer to receive PDF data.
-    buffer = BytesIO()
-
-    # Create the PDF object, using the buffer as its "file."
-    p = canvas.Canvas(buffer)
-
-    # Set slightly larger margins
-    # Load the font file from the default storage
-
-
-    p.setFont('B', 20)
-    p.drawString(20, 75, 'RECIBO')
-    p.ln(20)
-
-
-    p.setFont('', 14)
-    p.drawString(200, 200, subject)
-    p.ln(20)
-
-    p.drawString(20, 325, text)
-
-    # Add 5 new lines
-    for i in range(7):
-        p.ln(8)
-
-    # Draw a signature line
-    p.setLineWidth(0.4)
-    p.line(150, 470, 550, 470)
-
-    # Add a newline
-    p.ln(1)
-
-    # Add signature text
-    p.setFont('', 14)
-    p.drawString(350, 490, f'SRA. GABRIELA SEGURA\nLEYVA')
-
-    # Define the filename
-    filename = f"Recibo_{month.upper()}_{name}.pdf"
-
-    # Save the PDF file to the buffer.
-    p.showPage()
-    p.save()
-
-    # Close the PDF object cleanly, and we're done.
-    buffer.seek(0)
-
-    # Create the FileResponse object.
-    return FileResponse(buffer, as_attachment=True, filename=filename)
-
 def create_contract_pdf(item_dict):
-    contract, signatures = constructor_contract(item_dict=item_dict)
+    """
+    Generates a PDF contract based on the provided item dictionary.
+    Args:
+        item_dict (dict): A dictionary containing contract details. Must include a 'contract_type' key 
+                          with values 'local_comercial' or 'departamento'.
+    Returns:
+        str: The filename of the generated PDF.
+    Raises:
+        KeyError: If 'contract_type' is not in item_dict or has an invalid value.
+        Exception: For any other errors during PDF creation.
+    """
+    # define constructor functions depending on the contract type
+    if item_dict['contract_type'] == 'local_comercial':
+        contract, signatures = constructor_contract_local_comercial(item_dict=item_dict)
+    elif item_dict['contract_type'] == 'departamento':
+        contract, signatures = constructor_contract_departamento(item_dict=item_dict)
 
     class MyPDF(fpdf.FPDF):
         def header(self):
@@ -360,10 +183,61 @@ def create_contract_pdf(item_dict):
             for datum in data_row:
                 row.cell(datum)
 
-    filename = f"{datetime.datetime.now().strftime("%H_%M")}sample_contrato.pdf"
+    filename = f"contrato_{item_dict['nombre_arrendatario'].replace(' ', '_').replace('.','_')}.pdf"
     pdf.output(name=filename)
     return filename
 
-#tenant1 = Tenant(name='JOSE ANTONIO HURTADO LOPEZ', dia='01', precio='6,580.00', precio_en_letra='SEIS MIL QUINIENTOS OCHENTA', servicios='renta y mantenimiento', local='26-C')
-#tenant2 = Tenant(name='IRWING ARTURO PEÑA VARGAS', dia='15', precio='10,500.00', precio_en_letra='DIEZ MIL QUINIENTOS', servicios='renta', local='5-B')
-#tenant3 = Tenant(name='FRANCISCO SANCHEZ GALEANA', dia='15', precio='7,505.00', precio_en_letra='SIETE MIL QUINIENTOS CINCO', servicios='renta, mantenimiento, agua y luz', local='26')
+def send_emails_contracts(file_path, identifier):
+    """
+    Sends an email with the specified files as attachments for the given month.
+    Args:
+        files (list): List of file paths to be attached to the email.
+        month (str): The month for which the receipts are being sent.
+    Raises:
+        FileNotFoundError: If any of the files in the list do not exist.
+        smtplib.SMTPException: If there is an error sending the email.
+    Note:
+        This function assumes that the following variables are defined globally:
+        - from_email: The sender's email address.
+        - to_email: The recipient's email address.
+        - cc_email: The CC recipient's email address.
+        - smtp_server: The SMTP server address.
+        - smtp_port: The SMTP server port.
+        - smtp_username: The SMTP server username.
+        - smtp_password: The SMTP server password.
+        - default_storage: The storage system used to delete files.
+    """
+    # Compose the email
+    subject = f"Contrato {identifier.upper()}"
+    body = f"Copia de contrato de {identifier.upper()}"
+
+    # Create a multipart message
+    message = MIMEMultipart()
+    message['Subject'] = subject
+    message['From'] = from_email
+    message['To'] = to_email
+    message['Cc'] = cc_email
+    message.attach(MIMEText(body, 'plain'))
+
+    with open(file_path, 'rb') as f:
+        file_content = f.read()
+
+    # Create a MIMEApplication with the file content
+    attachment = MIMEApplication(file_content, _subtype="pdf")
+
+    # Extract the filename from the file path
+    filename = file_path.split('/')[-1]  # Adjust this based on your file paths
+    attachment.add_header('Content-Disposition', 'attachment', filename=filename)
+    
+    # Attach the file to the email
+    message.attach(attachment)
+
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        recipients = [to_email, cc_email]
+        server.sendmail(from_email, recipients, message.as_string())
+
+    # Delete the files
+    default_storage.delete(file_path)
+    os.remove(file_path)
