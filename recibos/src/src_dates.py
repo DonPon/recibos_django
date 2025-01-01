@@ -20,7 +20,7 @@ def parse_date_string(date_str):
                     raise ValueError("Invalid date format")
     return date_object
 
-def flag_one_month_to_date(date_str):
+def flag_one_month_to_date(date_str, dias=30):
     target_date = date_str
 
     print(date_str)
@@ -28,10 +28,10 @@ def flag_one_month_to_date(date_str):
     # Calculate the difference between the target date and the current date
     difference = target_date - datetime.datetime.now()
     print(f"difference: {difference.days}")
-    print(f"timedelta: {datetime.timedelta(days=15)}")
+    print(f"timedelta: {datetime.timedelta(days=int(dias))}")
     # Check if the difference is exactly one month
-    one_month = datetime.timedelta(days=15)  # Assuming a month has 30 days
-    if difference.days == one_month.days:
+    target_difference = datetime.timedelta(days=int(dias))
+    if difference.days == target_difference.days:
         return True
     else:
         return False

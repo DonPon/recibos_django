@@ -2,7 +2,7 @@ import os
 import time
 import datetime
 from django.shortcuts import redirect, get_object_or_404
-from django.http import HttpResponse, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseServerError, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView, TemplateView, ListView, DetailView
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
@@ -20,6 +20,7 @@ from django.views.generic.base import ContextMixin
 
 load_dotenv()
 
+dias = 40
 
 class EnvContextMixin(ContextMixin):
     def get_context_data(self, **kwargs):
@@ -246,30 +247,27 @@ class CreateContractPDFView(LoginRequiredMixin, EnvContextMixin, TemplateView):
 
 
 class ReminderView(EnvContextMixin, TemplateView):
-    template_name = 'reminder.html'
 
     def get(self, request, *args, **kwargs):
-        contract_info_html = []
+        expiring_contracts = []
         contracts = Contract.objects.all()
 
         for contract in contracts:
             vencimiento = parse_date_string(contract.fecha_vencimiento_contrato)
-            if flag_one_month_to_date(vencimiento):
-                body = f"Hola,\n\nEl siguiente contrato está próximo a vencer en 15 días:\n\n" \
+            if flag_one_month_to_date(vencimiento, dias):
+                body = f"Hola,\n\nEl siguiente contrato está próximo a vencer en {dias} días:\n\n" \
                        f"Arrendatario: {contract.nombre_arrendatario}\n" \
                        f"Vencimiento: {contract.fecha_vencimiento_contrato}\n" \
                        f"Local: {contract.local}\n" \
-                       f"Monto renta: ${contract.renta}\n\n" \
-                       f"Puedes renovarlo aquí: https://recibos-django.onrender.com/contracts/all-contracts/"
+                       f"Monto renta: ${contract.renta} MXN\n\n" \
+                       f"Ver contrato aquí: https://recibos-django.onrender.com/contracts/all-contracts/"
                 send_email("Próximo Vencimiento de Contrato", body)
 
-            contract_info_html.append(f"""
-                <p>Arrendatario: {contract.nombre_arrendatario}</p>
-                <p>Vencimiento: {contract.fecha_vencimiento_contrato}</p>
-                <p>Local: {contract.local}</p>
-                <p>Monto renta: ${contract.renta}</p>
-                <p>Puedes renovarlo aquí: <a href="https://recibos-django.onrender.com/contracts/all-contracts/">Renovar Contrato</a></p>
-                <hr>
-            """)
-        return HttpResponse("".join(contract_info_html))
+                expiring_contracts.append({
+                    'nombre_arrendatario': contract.nombre_arrendatario,
+                    'fecha_vencimiento_contrato': contract.fecha_vencimiento_contrato,
+                    'local': contract.local,
+                    'renta': contract.renta,
+                })
+        return JsonResponse({'expiring_contracts': expiring_contracts}, status=200)
 
