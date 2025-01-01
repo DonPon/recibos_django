@@ -11,6 +11,11 @@ class TenantForm(forms.ModelForm):
         model = Tenant
         fields = ['name', 'dia', 'precio', 'servicios', 'local']
         # fields = ['name', 'dia', 'precio', 'precio_en_letra', 'servicios', 'local']
+        widgets = {
+            'precio': forms.TextInput(attrs={'placeholder': 'Ej. 6,500.00'}),
+            'dia': forms.TextInput(attrs={'placeholder': 'Ej. 05'}),
+            'servicios': forms.TextInput(attrs={'placeholder': 'Ej. renta y mantenimiento'}),
+        }
 
 # class ContractForm(forms.ModelForm):
 #     class Meta:
@@ -35,6 +40,11 @@ class BaseContractForm(forms.ModelForm):
     class Meta:
         model = Contract
         fields = '__all__'
+        widgets = {
+            'fecha_inicio_contrato': forms.TextInput(attrs={'placeholder': 'Ej. 15/05/2025'}),
+            'fecha_vencimiento_contrato': forms.TextInput(attrs={'placeholder': 'Ej. 15/05/2026'}),
+            'iva': forms.TextInput(attrs={'placeholder': 'Ej. 1,500.00'}),
+        }
 
 class LocalComercialForm(BaseContractForm):
     class Meta(BaseContractForm.Meta):
