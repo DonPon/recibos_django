@@ -10,6 +10,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 from dotenv import load_dotenv
 from num2words import num2words
+from django.views import View
 
 from .models import Tenant, Contract
 from .forms import LoginForm, MonthForm, TenantForm, LocalComercialForm, DepartamentoForm
@@ -78,6 +79,44 @@ class GeneratePDFsView(LoginRequiredMixin, EnvContextMixin, FormView):
 
 class PdfGeneratedView(LoginRequiredMixin, EnvContextMixin, TemplateView):
     template_name = 'recibos/pdf_generated.html'
+
+# ------ Send every month and send invoice
+
+class AutomaticGeneratePDFsViewEveryMonth(EnvContextMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        today = datetime.datetime.now()
+
+        # Only execute if is day of the month
+        if today.day != 1:
+            return JsonResponse({"message": "No es el primer día del mes. No se generarán PDFs."}, status=200)
+
+        month_dict = {
+            1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril', 5: 'mayo', 6: 'junio',
+            7: 'julio', 8: 'agosto', 9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'
+        }
+        month = month_dict[datetime.datetime.now().month]
+        current_year = datetime.datetime.now().year
+        tenants = Tenant.objects.all()
+        files = []
+
+        for tenant in tenants:
+            day = tenant.dia
+            price = tenant.precio
+            price_letters = num2words(price.split('.')[0].replace(',', ''), lang='es')
+            servicios = tenant.servicios
+            local = tenant.local
+            subject = f"CDMX, a {day} de {month.lower()}\nde {current_year}"
+            text = f"Recibí de parte del SR. {(tenant.name).upper()}, la cantidad de ${price} ({price_letters.upper()} PESOS 00/100 M.N.), " \
+                   f"por concepto de {servicios.lower()} del local {local}, del inmueble ubicado en Calle Noche de Paz # 14 Colonia Granjas Navidad, " \
+                   f"Delegación Cuajimalpa, C.P. 05219, correspondiente al mes de {month.upper()} de {current_year}."
+
+            file_path = create_recibo_pdf(subject, text, month, tenant.name)
+            files.append(file_path)
+
+        time.sleep(1)
+        send_emails_recibos(files, month)
+        return JsonResponse({"message": "PDFs generados y correos enviados correctamente."}, status=200)
 
 # -------------------------------------TENANTS-------------------------------------------------------------------
 class TenantListView(LoginRequiredMixin, EnvContextMixin, ListView):
