@@ -5,5 +5,14 @@
         "C:\\Users\\4PF26LA_RS5\\anaconda3\\Scripts\\activate.bat",
         "C:\\Users\\4PF26LA_RS5\\anaconda3"
     ],
-    "python.terminal.activateEnvironment": true
+    "python.terminal.activateEnvironment": true,
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./recibos",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true
 }

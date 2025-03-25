@@ -12,7 +12,7 @@
 
     <style>
         body {
-            
+
         }
         .container {
             margin-top: 0px;
@@ -69,7 +69,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css">
 <body>
     <div class="container">
-        En esta sección podrás editar tus inquilinos
+        En esta sección podrás ver y editar tus contratos
                     <!-- Buttons customization -->
                     <div class="d-flex mt-3">
                         <a href="{% url 'generate_pdfs' %}" class="btn btn-outline-primary btn-sm">
@@ -82,31 +82,37 @@
                         </div>
                     </div>
                     <br>
-        {% for tenant in contracts %}
-            <div class="card">
-                <div class="card-header">
-                    {{ tenant.nombre_arrendatario }}
-                </div>
-                <div class="card-body">
-                    <h6>
-                        <span class="bold-label">Fecha Vencimiento:</span> {{ tenant.fecha_vencimiento_contrato }}
-                    </h6>
-                    <h6>
-                        <span class="bold-label">Dia de pago:</span> {{ tenant.dia_de_pago }} de cada mes
-                    </h6>
-                    <h6>
-                        <span class="bold-label">Monto:</span> ${{ tenant.precio }}
-                    </h6>
-                    <div class="row">
-                        <div class="col-md-6"></div>
-                        <div class="col-md-6"> 
-                            <a href="{% url 'update_contract' tenant_name=tenant.nombre_arrendatario %}" class="btn btn-primary btn-block">Editar</a>
-                            <a href="{% url 'delete_contract' tenant_name=tenant.nombre_arrendatario %}" class="btn btn-outline-danger btn-block mt-2">Borrar</a>
-                        </div>
-                    </div>
+{% for tenant in contracts %}
+    <div class="card">
+        <div class="card-header">
+            {{ tenant.nombre_arrendatario }}
+        </div>
+        <div class="card-body">
+            <h6>
+                <span class="bold-label">Fecha Vencimiento:</span> {{ tenant.fecha_vencimiento_contrato }}
+            </h6>
+            <h6>
+                <span class="bold-label">Dia de pago:</span> {{ tenant.dia_de_pago }} de cada mes
+            </h6>
+            <h6>
+                <span class="bold-label">Renta:</span> ${{ tenant.renta }} MXN
+            </h6>
+            <a href="{% url 'create_contract_pdf' contract_id=tenant.id %}" class="btn btn-secondary">Descagar copia contrato</a>
+            <div class="row">
+                <div class="col-md-6"></div>
+                <div class="col-md-6">
+                    <!--a href="{% url 'update_contract' id=tenant.id %}" class="btn btn-primary btn-block">Editar</a-->
+                    <a href="{% url 'delete_contract' id=tenant.id %}" class="btn btn-outline-danger btn-block mt-2">Borrar</a>
                 </div>
             </div>
-        {% endfor %}
+        </div>
+    </div>
+{% empty %}
+    <div class="alert alert-warning" role="alert">
+        No hay contratos disponibles. Puedes crear uno nuevo.
+    </div>
+{% endfor %}
+
 
         <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary btn-block mt-3">← Atrás</a>
     </div>
