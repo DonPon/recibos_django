@@ -343,7 +343,7 @@ class GenerateReciboUnaSolaVezOnDemandView(LoginRequiredMixin, EnvContextMixin, 
         propiedad = data['propiedad']
         property_type = 'local' if propiedad == 'Noche de Paz #14, Colonia Granjas Navidad, Delegación Cuajimalpa, C.P. 05219' else 'departamento'
         text = f"Recibí de parte {'del SR.' if titulo == 'SR.' else 'de la SRA.'} {(tenant_name).upper()}, la cantidad de ${precio} ({price_letters.upper()} PESOS 00/100 M.N.), " \
-               f"por concepto de {concepto.upper()} del {property_type} {local}, del inmueble ubicado en {propiedad}."
+               f"por concepto de {concepto.upper()} del {property_type} {local}, del inmueble ubicado en calle {propiedad}."
 
         file_path = create_recibo_pdf(subject, text, month, tenant_name)
         time.sleep(1)
