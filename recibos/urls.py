@@ -3,7 +3,8 @@ from .views import (
     LoginPageView, GeneratePDFsView, TenantListView, UpdateTenantView,
     AddTenantView, DeleteTenantView, ContractListView, UpdateContractView,
     AddContractView, DeleteContractView, ReminderView, UpdateSuccessView,
-    PdfGeneratedView, CreateContractPDFView, AutomaticGeneratePDFsViewEveryMonth
+    PdfGeneratedView, CreateContractPDFView, AutomaticGeneratePDFsViewEveryMonth,
+    GenerateReciboUnaSolaVezOnDemandView
 )
 
 urlpatterns = [
@@ -22,4 +23,5 @@ urlpatterns = [
     path('contracts/reminder/', ReminderView.as_view(), name='reminder'),
     path('create_contract_pdf/<uuid:contract_id>/', CreateContractPDFView.as_view(), name='create_contract_pdf'),
     path('automatic-invoice-check/', AutomaticGeneratePDFsViewEveryMonth.as_view(), name='automatic-invoice-check'),
+    path('generate-recibo-on-demand/', GenerateReciboUnaSolaVezOnDemandView.as_view(), name='generate_recibo_on_demand'),
 ]

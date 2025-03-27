@@ -13,9 +13,9 @@ from num2words import num2words
 from django.views import View
 
 from .models import Tenant, Contract
-from .forms import LoginForm, MonthForm, TenantForm, LocalComercialForm, DepartamentoForm
+from .forms import LoginForm, MonthForm, TenantForm, LocalComercialForm, DepartamentoForm, ReciboOnDemandForm
 from .src.src_email import send_email
-from .src.src_pdf_utils import create_recibo_pdf, send_emails_recibos, create_contract_pdf, send_emails_contracts
+from .src.src_pdf_utils import create_recibo_pdf, send_emails_recibos, create_contract_pdf, send_emails_contracts, send_emails_recibos_on_demand
 from .src.src_dates import parse_date_string, flag_one_month_to_date
 from django.views.generic.base import ContextMixin
 
@@ -309,4 +309,44 @@ class ReminderView(EnvContextMixin, TemplateView):
                     'renta': contract.renta,
                 })
         return JsonResponse({'expiring_contracts': expiring_contracts}, status=200)
+
+# ----------------------------------- RECIBO ON DEMAND (1 SOLA VEZ) ---------------------------------------------
+
+class GenerateReciboUnaSolaVezOnDemandView(LoginRequiredMixin, EnvContextMixin, FormView):
+    template_name = 'recibos/generate_recibo_una_sola_vez.html'
+    form_class = ReciboOnDemandForm
+    success_url = reverse_lazy('pdf_generated')
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        current_year = datetime.datetime.now().year
+        day = datetime.datetime.now().day
+        meses = [
+            "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
+            "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"
+        ]
+        month = meses[(datetime.datetime.now().month) - 1]
+        tenant_name = data['name']
+        precio = "{:,.2f}".format(float(data['precio'].replace(',', '')))
+        price_letters = num2words(precio.split('.')[0].replace(',', ''), lang='es')
+        concepto = data['tipo_recibo']
+        local = data['local']
+        subject = f"CDMX, a {day} de {month.lower()}\nde {current_year}"
+        titulo = data['titulo']
+        propiedad = data['propiedad']
+        property_type = 'local' if propiedad == 'Noche de Paz #14, Colonia Granjas Navidad, Delegación Cuajimalpa, C.P. 05219' else 'departamento'
+        text = f"Recibí de parte {'del SR.' if titulo == 'SR.' else 'de la SRA.'} {(tenant_name).upper()}, la cantidad de ${precio} ({price_letters.upper()} PESOS 00/100 M.N.), " \
+               f"por concepto de {concepto.upper()} del {property_type} {local}, del inmueble ubicado en {propiedad}."
+
+        file_path = create_recibo_pdf(subject, text, month, tenant_name)
+        time.sleep(1)
+        send_emails_recibos_on_demand([file_path], concepto, tenant_name)
+        return super().form_valid(form)
 

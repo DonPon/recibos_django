@@ -241,3 +241,63 @@ def send_emails_contracts(file_path, identifier):
     # Delete the files
     default_storage.delete(file_path)
     os.remove(file_path)
+
+def send_emails_recibos_on_demand(files, concepto, name):
+    """
+    Sends an email with the specified files as attachments for the given month.
+    Args:
+        files (list): List of file paths to be attached to the email.
+        month (str): The month for which the receipts are being sent.
+    Raises:
+        FileNotFoundError: If any of the files in the list do not exist.
+        smtplib.SMTPException: If there is an error sending the email.
+    Note:
+        This function assumes that the following variables are defined globally:
+        - from_email: The sender's email address.
+        - to_email: The recipient's email address.
+        - cc_email: The CC recipient's email address.
+        - smtp_server: The SMTP server address.
+        - smtp_port: The SMTP server port.
+        - smtp_username: The SMTP server username.
+        - smtp_password: The SMTP server password.
+        - default_storage: The storage system used to delete files.
+    """
+    # Compose the email
+    subject = f"Recibo {concepto.upper()} - {name.upper()}"
+    body = f"Recibo {concepto.upper()} - {name.upper()}."
+
+    # Create a multipart message
+    message = MIMEMultipart()
+    message['Subject'] = subject
+    message['From'] = from_email
+    message['To'] = to_email
+    message['Cc'] = cc_email
+    message.attach(MIMEText(body, 'plain'))
+
+    for file_path in files:
+
+        with open(file_path, 'rb') as f:
+            file_content = f.read()
+
+        # Create a MIMEApplication with the file content
+        attachment = MIMEApplication(file_content, _subtype="pdf")
+
+        # Extract the filename from the file path
+        filename = file_path.split('/')[-1]  # Adjust this based on your file paths
+        attachment.add_header('Content-Disposition', 'attachment', filename=filename)
+        
+        # Attach the file to the email
+        message.attach(attachment)
+
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        recipients = [to_email, cc_email]
+        server.sendmail(from_email, recipients, message.as_string())
+
+    # Delete the files
+    for file_path in files:
+        default_storage.delete(file_path)
+
+    for file_path_2 in files:
+        os.remove(file_path_2)
