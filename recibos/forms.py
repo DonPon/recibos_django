@@ -67,6 +67,31 @@ class DepartamentoForm(BaseContractForm):
         super(DepartamentoForm, self).__init__(*args, **kwargs)
         self.fields['contract_type'].initial = 'departamento'
 
+class ReciboOnDemandForm(forms.Form):
+    titulo = forms.ChoiceField(
+        choices=[('SR.', 'SR.'), ('SRA.', 'SRA.')],
+        label='Título',
+        help_text='Seleccione el título del inquilino (ej. SR., SRA.).'
+    )
+    name = forms.CharField(max_length=255, label='Nombre del inquilino', help_text='Ingrese el nombre completo del inquilino.')
+    precio = forms.CharField(max_length=255, label='Monto', help_text='Ingrese el monto del ej. "6,500.00"')
+    tipo_recibo = forms.ChoiceField(
+        choices=[('deposito', 'DEPÓSITO'), ('apartado', 'APARTADO'), ('renta', 'RENTA')],
+        label='Tipo de Recibo',
+        help_text='Seleccione el tipo de recibo.'
+    )
+    propiedad = forms.ChoiceField(
+        choices=[
+            ('Noche de Paz #14, Colonia Granjas Navidad, Delegación Cuajimalpa, C.P. 05219', 
+             'Noche de Paz #14, Colonia Granjas Navidad, Delegación Cuajimalpa, C.P. 05219'),
+            ('2do. Retorno de Loma del Recuerdo # 70, Colonia Lomas de Vista Hermosa, Delegación Cuajimalpa, C.P. 05100', 
+             '2do. Retorno de Loma del Recuerdo # 70, Colonia Lomas de Vista Hermosa, Delegación Cuajimalpa, C.P. 05100')
+        ],
+        label='Propiedad',
+        help_text='Seleccione el número de la propiedad.'
+    )
+    local = forms.CharField(max_length=255, label='Local/depto.', help_text='Ingrese sólo el número o letra del local o departamento (ej. 5D, C, etc.)')
+
 # authentication/forms.py
 from django import forms
 

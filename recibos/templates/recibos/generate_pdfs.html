@@ -15,6 +15,14 @@
         text-decoration: underline;
         color: blue;
     }
+    .btn-dark-yellow {
+        background-color: #ec94f8; /* Dark yellow */
+        color: white;
+        border: none;
+    }
+    .btn-dark-yellow:hover {
+        background-color: #bb4096; /* Slightly darker yellow for hover */
+    }
 </style>
 
 
@@ -57,6 +65,14 @@
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Generar Recibos</button>
                 </form>
+            </div>
+        </div>
+        <div class="card shadow-lg mt-4">
+            <div class="card-header">
+                <h5>Generar Otro Recibo Una Sola Vez</h5>
+            </div>
+            <div class="card-body text-center">
+                <a href="{% url 'generate_recibo_on_demand' %}" class="btn btn-dark-yellow btn-block" style="color: #343a40;">Generar Recibo Una Sola Vez</a>
             </div>
         </div>
     </div>
