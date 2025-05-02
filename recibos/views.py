@@ -336,7 +336,7 @@ class GenerateReciboUnaSolaVezOnDemandView(LoginRequiredMixin, EnvContextMixin, 
         tenant_name = data['name']
         precio = "{:,.2f}".format(float(data['precio'].replace(',', '')))
         price_letters = num2words(precio.split('.')[0].replace(',', ''), lang='es')
-        concepto = data['tipo_recibo']
+        concepto = data['tipo_recibo'].replace('_', ' ')
         local = data['local']
         subject = f"CDMX, a {day} de {month.lower()}\nde {current_year}"
         titulo = data['titulo']
