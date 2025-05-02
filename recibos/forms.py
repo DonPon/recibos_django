@@ -76,7 +76,7 @@ class ReciboOnDemandForm(forms.Form):
     name = forms.CharField(max_length=255, label='Nombre del inquilino', help_text='Ingrese el nombre completo del inquilino.')
     precio = forms.CharField(max_length=255, label='Monto', help_text='Ingrese el monto del ej. "6,500.00"')
     tipo_recibo = forms.ChoiceField(
-        choices=[('deposito', 'DEPÓSITO'), ('anticipo', 'ANTICIPO'), ('apartado', 'APARTADO'), ('renta', 'RENTA')],
+        choices=[('deposito', 'DEPÓSITO'), ('anticipo', 'ANTICIPO'), ('apartado', 'APARTADO'), ('renta', 'RENTA'), ('devolucion de deposito', 'DEVOLUCIÓN DE DEPÓSITO')],
         label='Tipo de Recibo',
         help_text='Seleccione el tipo de recibo.'
     )
