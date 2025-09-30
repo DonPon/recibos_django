@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    LoginPageView, GeneratePDFsView, TenantListView, UpdateTenantView,
+    GenerateConvenioTerminacionEntregaView, LoginPageView, GeneratePDFsView, TenantListView, UpdateTenantView,
     AddTenantView, DeleteTenantView, ContractListView, UpdateContractView,
     AddContractView, DeleteContractView, ReminderView, UpdateSuccessView,
     PdfGeneratedView, CreateContractPDFView, AutomaticGeneratePDFsViewEveryMonth,
@@ -24,4 +24,5 @@ urlpatterns = [
     path('create_contract_pdf/<uuid:contract_id>/', CreateContractPDFView.as_view(), name='create_contract_pdf'),
     path('automatic-invoice-check/', AutomaticGeneratePDFsViewEveryMonth.as_view(), name='automatic-invoice-check'),
     path('generate-recibo-on-demand/', GenerateReciboUnaSolaVezOnDemandView.as_view(), name='generate_recibo_on_demand'),
+    path('generate-terminacion-entrega-una-sola-vez/', GenerateConvenioTerminacionEntregaView.as_view(), name='generate_terminacion_entrega_una_sola_vez'),
 ]

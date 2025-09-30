@@ -67,6 +67,7 @@
                 </form>
             </div>
         </div>
+
         <div class="card shadow-lg mt-4">
             <div class="card-header">
                 <h5>Generar Otro Recibo Una Sola Vez</h5>
@@ -75,5 +76,15 @@
                 <a href="{% url 'generate_recibo_on_demand' %}" class="btn btn-dark-yellow btn-block" style="color: #343a40;">Generar Recibo Una Sola Vez</a>
             </div>
         </div>
+
+        <div class="card shadow-lg mt-4">
+            <div class="card-header">
+                <h5>Terminación y Entrega</h5>
+            </div>
+            <div class="card-body text-center">
+                <a href="{% url 'generate_terminacion_entrega_una_sola_vez' %}" class="btn btn-dark-yellow btn-block" style="color: #343a40;">Terminación y Entrega</a>
+            </div>
+        </div>
+
     </div>
 {% endblock %}

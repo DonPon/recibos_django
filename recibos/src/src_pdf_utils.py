@@ -2,8 +2,63 @@ from django.core.files.storage import default_storage
 import fpdf
 import datetime
 from .src_email import *
-from .strings import constructor_contract_local_comercial, constructor_contract_departamento
+from .strings import constructor_contract_local_comercial, constructor_contract_departamento, constructor_convenio_terminacion_entrega
 
+
+class BasePDF(fpdf.FPDF):
+    def header(self):
+        # Si quieres meter logo o encabezado fijo, lo haces aquí
+        pass
+
+    def footer(self):
+        self.set_font('Helvetica', 'I', 10)
+        self.set_y(-15)
+        self.cell(0, 10, str(self.page_no()), 0, 0, 'R')
+
+def base_generate_pdf(item_dict, constructor_fn, filename_prefix="contrato"):
+    """
+    Genera un PDF genérico con un constructor y un prefijo de nombre de archivo.
+    """
+    contract, signatures = constructor_fn(item_dict=item_dict)
+
+    pdf = BasePDF(format='Legal')
+    pdf.set_margins(left=30, top=15, right=30)
+    pdf.add_page()
+    pdf.set_font('Helvetica', '', 12)
+
+    for item in contract:
+        if '%TITLE%' in item:
+            pdf.cell(0, 6, item.replace('%TITLE%', ''), align='C', markdown=True, center=True)
+            pdf.ln(2)
+        else:
+            pdf.multi_cell(0, 6, item, align='J', markdown=True)
+
+    with pdf.table(text_align="CENTER") as table:
+        for data_row in signatures:
+            row = table.row()
+            for datum in data_row:
+                row.cell(datum)
+
+    filename = f"{filename_prefix}_{item_dict['nombre_arrendatario'].replace(' ', '_').replace('.','_')}.pdf"
+    pdf.output(name=filename)
+    return filename
+
+def create_contract_pdf(item_dict):
+    """
+    Genera contrato PDF en base al tipo.
+    """
+    if item_dict['contract_type'] == 'local_comercial':
+        return base_generate_pdf(item_dict, constructor_contract_local_comercial, filename_prefix="contrato")
+    elif item_dict['contract_type'] == 'departamento':
+        return base_generate_pdf(item_dict, constructor_contract_departamento, filename_prefix="contrato")
+    else:
+        raise KeyError("Invalid contract_type")
+    
+def create_terminacion_entrega_pdf(item_dict):
+    """
+    Genera PDF para convenio de terminación/entrega.
+    """
+    return base_generate_pdf(item_dict, constructor_convenio_terminacion_entrega, filename_prefix="terminacion_entrega")
 
 def create_recibo_pdf(subject, text, month, name):
     """
@@ -67,7 +122,7 @@ def create_recibo_pdf(subject, text, month, name):
 
     return filename
 
-def send_emails_recibos(files, month):
+def send_emails_recibos(files, month, to_email):
     """
     Sends an email with the specified files as attachments for the given month.
     Args:
@@ -127,7 +182,7 @@ def send_emails_recibos(files, month):
     for file_path_2 in files:
         os.remove(file_path_2)
 
-def create_contract_pdf(item_dict):
+def old_create_contract_pdf(item_dict):
     """
     Generates a PDF contract based on the provided item dictionary.
     Args:
@@ -187,7 +242,65 @@ def create_contract_pdf(item_dict):
     pdf.output(name=filename)
     return filename
 
-def send_emails_contracts(file_path, identifier):
+def old_create_terminacion_entrega_pdf(item_dict):
+    """
+    Generates a PDF termination of delivery based on the provided item dictionary.
+    Args:
+        item_dict (dict): A dictionary containing contract details. Must include a 'contract_type' key 
+                          with values 'local_comercial' or 'departamento'.
+    Returns:
+        str: The filename of the generated PDF.
+    Raises:
+        KeyError: If 'contract_type' is not in item_dict or has an invalid value.
+        Exception: For any other errors during PDF creation.
+    """
+    # define constructor
+    contract, signatures = constructor_convenio_terminacion_entrega(item_dict=item_dict)
+
+
+    class MyPDF(fpdf.FPDF):
+        def header(self):
+            # Your header implementation here (if any)
+            pass
+
+        def footer(self):
+            # Set font for the footer
+            self.set_font('Helvetica', 'I', 10)
+
+            # Position at 15 mm from bottom
+            self.set_y(-15)
+
+            # Add a page number as a footnote
+            footnote_text = f"{self.page_no()}"
+            self.cell(0, 10, footnote_text, 0, 0, 'R')
+
+    # Create a new PDF document.
+    pdf = MyPDF(format='Legal')
+    # Set slightly larger margins
+    pdf.set_margins(left=30, top=15, right=30)
+    # Add a new page.
+    pdf.add_page()
+    # Reset font for body text
+    pdf.set_font('Helvetica', '', 12)
+
+    for item in contract:
+        if '%TITLE%' in item:
+            pdf.cell(0, 6, item.replace('%TITLE%', ''), align='C', markdown=True, center=True)
+            pdf.ln(2)
+        else:
+            pdf.multi_cell(0, 6, item, align='J', markdown=True)
+
+    with pdf.table(text_align="CENTER") as table:
+        for data_row in signatures:
+            row = table.row()
+            for datum in data_row:
+                row.cell(datum)
+
+    filename = f"contrato_{item_dict['nombre_arrendatario'].replace(' ', '_').replace('.','_')}.pdf"
+    pdf.output(name=filename)
+    return filename
+
+def send_emails_contracts(file_path, identifier, to_email):
     """
     Sends an email with the specified files as attachments for the given month.
     Args:
@@ -242,7 +355,7 @@ def send_emails_contracts(file_path, identifier):
     default_storage.delete(file_path)
     os.remove(file_path)
 
-def send_emails_recibos_on_demand(files, concepto, name):
+def send_emails_recibos_on_demand(files, concepto, name, to_email):
     """
     Sends an email with the specified files as attachments for the given month.
     Args:
