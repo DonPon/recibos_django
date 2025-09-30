@@ -13,13 +13,14 @@ from num2words import num2words
 from django.views import View
 
 from .models import Tenant, Contract
-from .forms import LoginForm, MonthForm, TenantForm, LocalComercialForm, DepartamentoForm, ReciboOnDemandForm
+from .forms import ConvenioTerminacionEntregaForm, LoginForm, MonthForm, TenantForm, LocalComercialForm, DepartamentoForm, ReciboOnDemandForm
 from .src.src_email import send_email
-from .src.src_pdf_utils import create_recibo_pdf, send_emails_recibos, create_contract_pdf, send_emails_contracts, send_emails_recibos_on_demand
+from .src.src_pdf_utils import create_recibo_pdf, create_terminacion_entrega_pdf, send_emails_recibos, create_contract_pdf, send_emails_contracts, send_emails_recibos_on_demand
 from .src.src_dates import parse_date_string, flag_one_month_to_date
 from django.views.generic.base import ContextMixin
 
 load_dotenv()
+to_email = os.getenv('TO_EMAIL')
 
 dias = 40
 
@@ -74,7 +75,7 @@ class GeneratePDFsView(LoginRequiredMixin, EnvContextMixin, FormView):
             files.append(file_path)
 
         time.sleep(1)
-        send_emails_recibos(files, month)
+        send_emails_recibos(files=files, month=month, to_email=self.request.user.email)
         return super().form_valid(form)
 
 class PdfGeneratedView(LoginRequiredMixin, EnvContextMixin, TemplateView):
@@ -115,7 +116,7 @@ class AutomaticGeneratePDFsViewEveryMonth(EnvContextMixin, View):
             files.append(file_path)
 
         time.sleep(1)
-        send_emails_recibos(files, month)
+        send_emails_recibos(files=files, month=month, to_email=to_email)
         return JsonResponse({"message": "PDFs generados y correos enviados correctamente."}, status=200)
 
 # -------------------------------------TENANTS-------------------------------------------------------------------
@@ -267,7 +268,6 @@ class DeleteContractView(LoginRequiredMixin, EnvContextMixin, DeleteView):
     success_url = reverse_lazy('generate_pdfs')
     pk_url_kwarg = 'id'
 
-
 class CreateContractPDFView(LoginRequiredMixin, EnvContextMixin, TemplateView):
     template_name = 'contratos/pdf_generated.html'
 
@@ -275,7 +275,7 @@ class CreateContractPDFView(LoginRequiredMixin, EnvContextMixin, TemplateView):
         contract_id = kwargs.get('contract_id')
         contract = Contract.objects.filter(id=contract_id).values().first()
         contract_file_path = create_contract_pdf(item_dict=contract)
-        send_emails_contracts(contract_file_path, contract['nombre_arrendatario'])
+        send_emails_contracts(file_path=contract_file_path, identifier=contract['nombre_arrendatario'], to_email=self.request.user.email)
 
         return super().get(request, *args, **kwargs)
 
@@ -283,7 +283,6 @@ class CreateContractPDFView(LoginRequiredMixin, EnvContextMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['contract_id'] = kwargs.get('contract_id')
         return context
-
 
 class ReminderView(EnvContextMixin, TemplateView):
 
@@ -300,7 +299,7 @@ class ReminderView(EnvContextMixin, TemplateView):
                        f"Local: {contract.local}\n" \
                        f"Monto renta: ${contract.renta} MXN\n\n" \
                        f"Ver contrato aquí: https://recibos-django.onrender.com/contracts/all-contracts/"
-                send_email("Próximo Vencimiento de Contrato", body)
+                send_email(subject="Próximo Vencimiento de Contrato", body=body, to_email=to_email)
 
                 expiring_contracts.append({
                     'nombre_arrendatario': contract.nombre_arrendatario,
@@ -347,6 +346,58 @@ class GenerateReciboUnaSolaVezOnDemandView(LoginRequiredMixin, EnvContextMixin, 
 
         file_path = create_recibo_pdf(subject, text, month, tenant_name)
         time.sleep(1)
-        send_emails_recibos_on_demand([file_path], concepto, tenant_name)
+        send_emails_recibos_on_demand(files=[file_path], concepto=concepto, name=tenant_name, to_email=self.request.user.email)
         return super().form_valid(form)
 
+# ------------------------CONVENIO DE TERMINACIÓN Y ENTREGA (1 SOLA VEZ) -----------------------------------------
+
+class GenerateConvenioTerminacionEntregaView(LoginRequiredMixin, EnvContextMixin, FormView): 
+    template_name = 'terminacion_entrega/generate_terminacion_entrega_una_sola_vez.html'
+    form_class = ConvenioTerminacionEntregaForm
+    success_url = reverse_lazy('pdf_generated')
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        current_year = datetime.datetime.now().year
+        day = datetime.datetime.now().day
+        meses = [
+            "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
+            "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"
+        ]
+        month = meses[(datetime.datetime.now().month) - 1]
+        titulo = data['titulo'].replace('.', '')
+        tenant_name = data['name']
+        local = data['local']
+        subject = f"CIUDAD DE MÉXICO, A {day} DE {month.upper()} DE {current_year}\n"
+        fecha_hoy = f"{day} DE {month} DE {current_year}"
+        comienzo_contrato = data['comienzo_contrato']
+        terminacion_contrato = data['terminacion_contrato']
+        duracion_contrato = datetime.datetime.strptime(terminacion_contrato, '%d/%m/%Y').year - datetime.datetime.strptime(comienzo_contrato, '%d/%m/%Y').year
+
+        propiedad = data['propiedad']
+        property_type = 'local' if propiedad == 'Noche de Paz #14, Colonia Granjas Navidad, Delegación Cuajimalpa, C.P. 05219' else 'departamento'
+        
+        item_dict = {
+            'titulo_arrendatario': titulo,
+            'subject': subject,
+            'nombre_arrendatario': (tenant_name).upper(),
+            'local': local,
+            'propiedad': propiedad,
+            'property_type': property_type,
+            'fecha_hoy': fecha_hoy,
+            'duracion_contrato': f'{duracion_contrato} AÑO(S)',
+            'comienzo_contrato': comienzo_contrato,
+            'terminacion_contrato': terminacion_contrato,
+        }
+
+        file_path = create_terminacion_entrega_pdf(item_dict)
+        time.sleep(1)
+        send_emails_recibos_on_demand(files=[file_path], concepto='Convenio_Terminacion_Entrega', name=tenant_name, to_email=self.request.user.email)
+        return super().form_valid(form)

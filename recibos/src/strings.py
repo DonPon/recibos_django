@@ -37,6 +37,31 @@ NATIONALITY_CHOICES = {
     'AU': 'Australia',
 }
 
+def _fecha_a_texto_solo_mes(fecha_str):
+    """
+    Convierte una fecha en formato de cadena a su representación con el mes en texto.
+    Args:
+        fecha_str (str): La fecha en formato de cadena, esperada en el formato "dd/mm/yyyy".
+    Returns:
+        str: La fecha con el mes convertido a texto en español. Ejemplo: "15/01/2025" se convierte en "15 DE ENERO DE 2025".
+    Raises:
+        ValueError: Si la fecha no está en el formato esperado "dd/mm/yyyy".
+    """
+    
+    meses = [
+        "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
+        "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"
+    ]
+
+    # Parse the date string
+    fecha_str = fecha_str.replace(".", "/")
+    fecha = datetime.datetime.strptime(fecha_str, "%d/%m/%Y")
+    dia = fecha.day
+    mes = meses[fecha.month - 1]
+    anio = fecha.year
+
+    return f"{dia} DE {mes} DE {anio}"
+
 def _convertir_fecha_texto(fecha_str):
     """
     Convierte una fecha en formato de cadena a su representación en texto.
@@ -608,6 +633,60 @@ Los contratantes acuerdan que, al término de la vigencia de este contrato, **"{
 Enteradas **"LAS PARTES"** del contenido y alcance de las cláusulas que anteceden, y toda vez que las mismas no son contrarias a Derecho, a la moral o a las buenas costumbres, las partes firman el presente contrato por triplicado en la Ciudad de México, el **{_convertir_fecha_texto(item_dict['fecha_inicio_contrato'])}**.
 
         '''
+    ]
+
+    # Define table data
+    signatures = [
+        ["LA ARRENDADORA", f"{prefijo_arrendatario}"],
+
+        [
+            """
+
+
+            _______________________
+            GABRIELA SEGURA LEYVA""", f"""
+
+
+    _______________________
+    {item_dict['nombre_arrendatario']}"""],
+
+    ]
+
+    return contrato_full, signatures
+
+def constructor_convenio_terminacion_entrega(item_dict):
+    item_dict = dict(item_dict)
+
+    if item_dict['titulo_arrendatario'] == 'SRA':
+        prefijo_arrendatario = 'LA ARRENDATARIA'
+    elif item_dict['titulo_arrendatario'] == 'SR':
+        prefijo_arrendatario = 'EL ARRENDATARIO'
+
+    fecha_comienzo_letras = _fecha_a_texto_solo_mes(item_dict['comienzo_contrato'])
+    fecha_terminacion_letras = _fecha_a_texto_solo_mes(item_dict['terminacion_contrato'])
+    contrato_full = [   
+        f'''
+%TITLE%{item_dict['subject']}
+''',
+'''
+''',
+'''
+%TITLE%**CONVENIO DE TERMINACIÓN Y ENTREGA** 
+''',
+f'''
+**DEL BIEN INMUEBLE UBICADO EN CALLE {item_dict['propiedad']}, {item_dict['property_type']} {item_dict['local']}.
+GABRIELA SEGURA LEYVA, EN SU CALIDAD DE ARRENDADOR Y POR OTRO LADO {item_dict['nombre_arrendatario']}, EN SU CALIDAD DE ARRENDATARIO, MANIFIESTAN LO SIGUIENTE: **                              
+''',
+f'''Por medio del presente escrito reconocen haber celebrado contrato de arrendamiento respecto del bien inmueble ubicado en CALLE {item_dict['propiedad']}, {item_dict['property_type']} {item_dict['local']}, en fecha {item_dict['fecha_hoy']}, por el término de {item_dict['duracion_contrato']}; comenzando a partir del día {fecha_comienzo_letras}, venciendo el día {fecha_terminacion_letras}.
+''',
+f'''Del cual se desprende que el mismo ha concluido, por lo tanto por así convenir a sus intereses, el arrendatario hace entrega el día de hoy de la propiedad, en forma voluntaria, pacífica, lisa y llana del inmueble dado en arrendamiento; haciendo la entrega también de las llaves de este, entregando el mencionado bien inmueble totalmente desocupado, no dejando dentro de este ningún bien de su pertenencia.
+''',
+'''Así mismo el arrendatario entrega los recibos de los servicios de agua potable, gas y energía eléctrica, obligándose a pagar los remanentes que se hayan generado durante su estancia.
+''',
+'''El depósito en garantía será devuelto de acuerdo a lo dispuesto en la cláusula VIGÉSIMA QUINTA del contrato de arrendamiento.
+''',
+'''Ambas partes manifiestan que a la firma del presente convenio no existe dolo, error o mala fe que pudiera nulificar el mismo, no reservándose derecho legal alguno que pudiera corresponderles, firmándose por triplicado en la Ciudad de México.
+'''
     ]
 
     # Define table data
