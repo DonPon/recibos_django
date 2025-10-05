@@ -25,8 +25,10 @@
     }
 </style>
 
-
-    <div class="container">
+    <div class="container"></style>
+        <div style="text-align: left; color: #343a40; font-size: 16px; margin-bottom: 10px;">
+            Hola, {{ request.user.username }}
+        </div>
         <div class="line"></div>
         <div class="btn-group" role="group" aria-label="Navigation Links">
             <a href="{% url 'update_tenants' %}" class="btn btn-outline-secondary custom-btn">
