@@ -1,10 +1,10 @@
-<!-- update_success.html -->
+<!-- pdf_generated.html -->
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Informacion actualizada</title>
+    <title>Recibos generados</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
@@ -20,8 +20,8 @@
     <div class="container">
         <div class="card">
             <div class="card-body">
-                <h1 class="card-title">informacion actualizada correctamente.</h1>
-                <a href="{% url 'all_contracts' %}" class="btn btn-primary">Atras</a>
+                <h1 class="card-title">Los recibos para el mes de {{ month }} han sido enviados por correo.</h1>
+                <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-primary">Atras</a>
             </div>
         </div>
     </div>

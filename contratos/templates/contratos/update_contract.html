@@ -50,7 +50,7 @@
                 <h3 class="card-title">{{ contract.nombre_arrendatario }}</h3>
             </div>
             <div class="card-body">
-                <form method="post" action="{% url 'update_contract' id=contract.id %}">
+                <form method="post" action="{% url 'contratos:update_contract' id=contract.id %}">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="{{ form.nombre_arrendatario.id_for_label }}">Nombre:</label>
@@ -120,7 +120,7 @@
                 
                     <button type="submit" class="btn btn-success btn-block">Guardar</button>
                 </form>
-                <a href="{% url 'all_contracts' %}" class="btn btn-secondary btn-block">← Cancelar</a>
+                <a href="{% url 'contratos:all_contracts' %}" class="btn btn-secondary btn-block">← Cancelar</a>
             </div>
         </div>
     </div>

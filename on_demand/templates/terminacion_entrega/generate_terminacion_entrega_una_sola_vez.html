@@ -7,7 +7,7 @@
             <h1>Generar Convenio Terminación/Entrega</h1>
         </div>
         <div class="card-body">
-            <form method="post" action="{% url 'generate_terminacion_entrega_una_sola_vez' %}">
+            <form method="post" action="{% url 'on_demand:generate_terminacion_entrega_una_sola_vez' %}">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="titulo">Título</label>
@@ -47,7 +47,7 @@
                 <button type="submit" class="btn btn-primary">Generar Convenio</button>
             </form>
             <br><div class="d-flex mt-3">
-                <a href="{% url 'generate_pdfs' %}" class="btn btn-outline-primary btn-sm">
+                <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-outline-primary btn-sm">
                     <i class="bi bi-arrow-left"></i> ← Atrás
                 </a></div>
         </div>

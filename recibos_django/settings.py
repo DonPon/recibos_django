@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'recibos',
+    'contratos',
+    'on_demand',
 ]
 
 MIDDLEWARE = [

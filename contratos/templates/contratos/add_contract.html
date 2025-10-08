@@ -65,14 +65,14 @@
                 {% endif %}
 
                 {% if contract_type %}
-                <form method="post" action="{% url 'add_contract' %}">
+                <form method="post" action="{% url 'contratos:add_contract' %}">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <button type="submit" class="btn btn-success btn-block">Guardar</button>
                 </form>
                 {% endif %}
                 <br>
-                <a href="{% url 'all_contracts' %}" class="btn btn-secondary btn-block">← Cancelar</a>
+                <a href="{% url 'contratos:all_contracts' %}" class="btn btn-secondary btn-block">← Cancelar</a>
             </div>
         </div>
     </div>

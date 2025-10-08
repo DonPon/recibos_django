@@ -31,10 +31,10 @@
         </div>
         <div class="line"></div>
         <div class="btn-group" role="group" aria-label="Navigation Links">
-            <a href="{% url 'update_tenants' %}" class="btn btn-outline-secondary custom-btn">
+            <a href="{% url 'recibos:update_tenants' %}" class="btn btn-outline-secondary custom-btn">
                 <i class="bi bi-eye"></i> Editar Inquilinos/Recibos
             </a>
-            <a href="{% url 'all_contracts' %}" class="btn btn-outline-secondary custom-btn">
+            <a href="{% url 'contratos:all_contracts' %}" class="btn btn-outline-secondary custom-btn">
                 <i class="bi bi-eye"></i> Contratos
             </a>
         </div>
@@ -45,7 +45,7 @@
                 <h5>Generador de Recibos</h5>
             </div>
             <div class="card-body">
-                <form method="post" action="{% url 'generate_pdfs' %}">
+                <form method="post" action="{% url 'recibos:generate_pdfs' %}">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="monthSelect">Selecciona el mes:</label>
@@ -75,7 +75,7 @@
                 <h5>Generar Otro Recibo Una Sola Vez</h5>
             </div>
             <div class="card-body text-center">
-                <a href="{% url 'generate_recibo_on_demand' %}" class="btn btn-dark-yellow btn-block" style="color: #343a40;">Generar Recibo Una Sola Vez</a>
+                <a href="{% url 'on_demand:generate_recibo_on_demand' %}" class="btn btn-dark-yellow btn-block" style="color: #343a40;">Generar Recibo Una Sola Vez</a>
             </div>
         </div>
 
@@ -84,7 +84,7 @@
                 <h5>Terminación y Entrega</h5>
             </div>
             <div class="card-body text-center">
-                <a href="{% url 'generate_terminacion_entrega_una_sola_vez' %}" class="btn btn-dark-yellow btn-block" style="color: #343a40;">Terminación y Entrega</a>
+                <a href="{% url 'on_demand:generate_terminacion_entrega_una_sola_vez' %}" class="btn btn-dark-yellow btn-block" style="color: #343a40;">Terminación y Entrega</a>
             </div>
         </div>
 

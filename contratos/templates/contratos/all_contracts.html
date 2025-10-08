@@ -72,11 +72,11 @@
         En esta sección podrás ver y editar tus contratos
                     <!-- Buttons customization -->
                     <div class="d-flex mt-3">
-                        <a href="{% url 'generate_pdfs' %}" class="btn btn-outline-primary btn-sm">
+                        <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-arrow-left"></i> ← Atrás
                         </a>
                         <div class="flex-grow-1 ml-2">
-                            <a href="{% url 'add_contract' %}" class="btn btn-success btn-block">
+                            <a href="{% url 'contratos:add_contract' %}" class="btn btn-success btn-block">
                                 &#43;  Nuevo Contrato
                             </a>
                         </div>
@@ -97,12 +97,12 @@
             <h6>
                 <span class="bold-label">Renta:</span> ${{ tenant.renta }} MXN
             </h6>
-            <a href="{% url 'create_contract_pdf' contract_id=tenant.id %}" class="btn btn-secondary">Descagar copia contrato</a>
+            <a href="{% url 'contratos:create_contract_pdf' contract_id=tenant.id %}" class="btn btn-secondary">Descagar copia contrato</a>
             <div class="row">
                 <div class="col-md-6"></div>
                 <div class="col-md-6">
                     <!--a href="{% url 'update_contract' id=tenant.id %}" class="btn btn-primary btn-block">Editar</a-->
-                    <a href="{% url 'delete_contract' id=tenant.id %}" class="btn btn-outline-danger btn-block mt-2">Borrar</a>
+                    <a href="{% url 'contratos:delete_contract' id=tenant.id %}" class="btn btn-outline-danger btn-block mt-2">Borrar</a>
                 </div>
             </div>
         </div>
@@ -114,7 +114,7 @@
 {% endfor %}
 
 
-        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary btn-block mt-3">← Atrás</a>
+        <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-secondary btn-block mt-3">← Atrás</a>
     </div>
 
 </body>

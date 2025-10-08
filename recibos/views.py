@@ -8,33 +8,23 @@ from django.views.generic import FormView, TemplateView, ListView, DetailView
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
-from dotenv import load_dotenv
 from num2words import num2words
 from django.views import View
 
-from .models import Tenant, Contract
-from .forms import ConvenioTerminacionEntregaForm, LoginForm, MonthForm, TenantForm, LocalComercialForm, DepartamentoForm, ReciboOnDemandForm
-from .src.src_email import send_email
-from .src.src_pdf_utils import create_recibo_pdf, create_terminacion_entrega_pdf, send_emails_recibos, create_contract_pdf, send_emails_contracts, send_emails_recibos_on_demand
-from .src.src_dates import parse_date_string, flag_one_month_to_date
-from django.views.generic.base import ContextMixin
+from recibos.models import Tenant
+from recibos.forms import LoginForm, MonthForm, TenantForm
+from src.src_email import send_email
+from src.src_pdf_utils import create_recibo_pdf, send_emails_recibos
+from src.src_dates import parse_date_string, flag_one_month_to_date
 
-load_dotenv()
-to_email = os.getenv('TO_EMAIL')
+from recibos_django.mixins import EnvContextMixin, to_email, dias
 
-dias = 40
-
-class EnvContextMixin(ContextMixin):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['ENV'] = os.getenv('ENV')
-        return context
 
 
 class LoginPageView(EnvContextMixin, FormView):
     template_name = 'authentication/login.html'
     form_class = LoginForm
-    success_url = reverse_lazy('generate_pdfs')
+    success_url = reverse_lazy('recibos:generate_pdfs')
 
     def form_valid(self, form):
         user = authenticate(
@@ -48,11 +38,10 @@ class LoginPageView(EnvContextMixin, FormView):
             form.add_error(None, 'Contraseña incorrecta.')
             return self.form_invalid(form)
 
-
 class GeneratePDFsView(LoginRequiredMixin, EnvContextMixin, FormView):
     template_name = 'recibos/generate_pdfs.html'
     form_class = MonthForm
-    success_url = reverse_lazy('pdf_generated')
+    success_url = reverse_lazy('recibos:pdf_generated')
 
     def form_valid(self, form):
         month = form.cleaned_data['month']
@@ -83,7 +72,7 @@ class PdfGeneratedView(LoginRequiredMixin, EnvContextMixin, TemplateView):
 
 # ------ Send every month and send invoice
 
-class AutomaticGeneratePDFsViewEveryMonth(EnvContextMixin, View):
+class Recibos_AutomaticGeneratePDFsViewEveryMonth(EnvContextMixin, View):
 
     def get(self, request, *args, **kwargs):
         today = datetime.datetime.now()
@@ -120,16 +109,16 @@ class AutomaticGeneratePDFsViewEveryMonth(EnvContextMixin, View):
         return JsonResponse({"message": "PDFs generados y correos enviados correctamente."}, status=200)
 
 # -------------------------------------TENANTS-------------------------------------------------------------------
-class TenantListView(LoginRequiredMixin, EnvContextMixin, ListView):
+class Recibos_TenantListView(LoginRequiredMixin, EnvContextMixin, ListView):
     model = Tenant
     template_name = 'recibos/update_tenants.html'
     context_object_name = 'tenants'
 
-class UpdateTenantView(LoginRequiredMixin, EnvContextMixin, UpdateView):
+class Recibos_UpdateTenantView(LoginRequiredMixin, EnvContextMixin, UpdateView):
     model = Tenant
     form_class = TenantForm
     template_name = 'recibos/update_tenant.html'
-    success_url = reverse_lazy('update_success')
+    success_url = reverse_lazy('recibos:update_success')
     context_object_name = 'editing_tenant'
     slug_field = 'name'  # Tell Django to use 'name' field for lookup
     slug_url_kwarg = 'tenant_name'  # Match 'tenant_name' in the URL to 'name'
@@ -141,14 +130,14 @@ class UpdateTenantView(LoginRequiredMixin, EnvContextMixin, UpdateView):
         tenant.save()
         return super().form_valid(form)
 
-class UpdateSuccessView(LoginRequiredMixin, EnvContextMixin, TemplateView):
+class Recibos_UpdateSuccessView(LoginRequiredMixin, EnvContextMixin, TemplateView):
     template_name = 'recibos/update_success.html'
 
-class AddTenantView(LoginRequiredMixin, EnvContextMixin, CreateView):
+class Recibos_AddTenantView(LoginRequiredMixin, EnvContextMixin, CreateView):
     model = Tenant
     form_class = TenantForm
     template_name = 'recibos/add_tenant.html'
-    success_url = reverse_lazy('update_tenants')
+    success_url = reverse_lazy('recibos:update_tenants')
 
     def form_valid(self, form):
         tenant = form.save(commit=False)
@@ -158,133 +147,15 @@ class AddTenantView(LoginRequiredMixin, EnvContextMixin, CreateView):
         tenant.save()
         return super().form_valid(form)
 
-class DeleteTenantView(LoginRequiredMixin, EnvContextMixin, DeleteView):
+class Recibos_DeleteTenantView(LoginRequiredMixin, EnvContextMixin, DeleteView):
     model = Tenant
     template_name = 'recibos/delete_tenant.html'
-    success_url = reverse_lazy('generate_pdfs')
+    success_url = reverse_lazy('recibos:generate_pdfs')
     slug_field = 'name'  # Specify the model field to use for lookup
     slug_url_kwarg = 'tenant_name'  # Match this to the URL parameter
     context_object_name = 'tenant'
 
-# ----------------------------------------CONTRACTS--------------------------------------------------------------
-class ContractListView(LoginRequiredMixin, EnvContextMixin, ListView):
-    model = Contract
-    template_name = 'contratos/all_contracts.html'
-    context_object_name = 'contracts'
 
-    def get(self, request, *args, **kwargs):
-        if 'download_contract' in request.GET:
-            tenant_name = request.GET.get('tenant_name')
-            contract = get_object_or_404(Contract, nombre_arrendatario=tenant_name)
-            # logic to generate and return the PDF file
-            create_contract_pdf(item_dict=contract)
-            return
-        return super().get(request, *args, **kwargs)
-
-class UpdateContractView(LoginRequiredMixin, EnvContextMixin, UpdateView):
-    model = Contract
-    form_class = LocalComercialForm
-    template_name = 'contratos/update_contract.html'
-    pk_url_kwarg = 'id'
-    success_url = reverse_lazy('contracts_update_success')
-
-    def get_form_class(self):
-        contract_type = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
-        if contract_type == 'local_comercial':
-            return LocalComercialForm
-        elif contract_type == 'departamento':
-            return DepartamentoForm
-        return LocalComercialForm  # Default form if type is not specified
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['contract_type'] = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
-        return context
-
-    def form_valid(self, form):
-        contract = form.save(commit=False)
-        contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
-        contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
-        contract.ine_arrendatario = contract.ine_arrendatario.upper()
-        contract.curp_arrendatario = contract.curp_arrendatario.upper()
-        contract.celular_arrendatario = contract.celular_arrendatario
-        contract.fecha_inicio_contrato = contract.fecha_inicio_contrato
-        contract.fecha_vencimiento_contrato = contract.fecha_vencimiento_contrato
-        contract.renta = "{:,.2f}".format(float(contract.renta.replace(',', '')))
-        contract.iva = "{:,.2f}".format(float(contract.iva.replace(',', '')))
-        contract.total = "{:,.2f}".format(float(contract.total.replace(',', '')))
-        contract.deposito = "{:,.2f}".format(float(contract.deposito.replace(',', '')))
-        contract.mantenimiento = "{:,.2f}".format(float(contract.mantenimiento.replace(',', '')))
-        contract.dia_de_pago = contract.dia_de_pago
-        contract.save()
-        return super().form_valid(form)
-
-class AddContractView(LoginRequiredMixin, EnvContextMixin, CreateView):
-    model = Contract
-    #form_class = ContractForm
-    template_name = 'contratos/add_contract.html'
-    success_url = reverse_lazy('all_contracts')
-
-    def get_form_class(self):
-        contract_type = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
-        self.contract_type = contract_type
-        if contract_type == 'local_comercial':
-            return LocalComercialForm
-        elif contract_type == 'departamento':
-            return DepartamentoForm
-        return LocalComercialForm
-        
-
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['contract_type'] = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
-        return context
-
-    def form_valid(self, form):
-        contract = form.save(commit=False)
-        contract.contract_type = self.request.GET.get('contract_type') or self.request.POST.get('contract_type')
-        contract.nombre_arrendatario = contract.nombre_arrendatario.upper()
-        contract.ine_arrendatario = contract.identificacion_arrendatario.upper()
-        contract.curp_arrendatario = contract.curp_arrendatario.upper()
-        contract.celular_arrendatario = contract.celular_arrendatario
-        contract.fecha_inicio_contrato = contract.fecha_inicio_contrato
-        contract.fecha_vencimiento_contrato = contract.fecha_vencimiento_contrato
-        contract.renta = "{:,.2f}".format(float(contract.renta.replace(',', '')))
-        contract.iva = "{:,.2f}".format(float(contract.iva.replace(',', '')))
-        contract.total = "{:,.2f}".format(float(contract.total.replace(',', '')))
-        contract.deposito = "{:,.2f}".format(float(contract.deposito.replace(',', '')))
-        contract.mantenimiento = "{:,.2f}".format(float(contract.mantenimiento.replace(',', '')))
-        contract.dia_de_pago = contract.dia_de_pago
-        contract.save()
-        print(contract.__dict__)
-        contract_file_path = create_contract_pdf(item_dict=contract.__dict__)
-        send_emails_contracts(contract_file_path, contract.__dict__['nombre_arrendatario'])
-        return super().form_valid(form)
-
-class DeleteContractView(LoginRequiredMixin, EnvContextMixin, DeleteView):
-    model = Contract
-    template_name = 'contratos/delete_contract.html'
-    success_url = reverse_lazy('generate_pdfs')
-    pk_url_kwarg = 'id'
-
-class CreateContractPDFView(LoginRequiredMixin, EnvContextMixin, TemplateView):
-    template_name = 'contratos/pdf_generated.html'
-
-    def get(self, request, *args, **kwargs):
-        contract_id = kwargs.get('contract_id')
-        contract = Contract.objects.filter(id=contract_id).values().first()
-        contract_file_path = create_contract_pdf(item_dict=contract)
-        send_emails_contracts(file_path=contract_file_path, identifier=contract['nombre_arrendatario'], to_email=self.request.user.email)
-
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['contract_id'] = kwargs.get('contract_id')
-        return context
-
-class ReminderView(EnvContextMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         expiring_contracts = []
@@ -308,96 +179,3 @@ class ReminderView(EnvContextMixin, TemplateView):
                     'renta': contract.renta,
                 })
         return JsonResponse({'expiring_contracts': expiring_contracts}, status=200)
-
-# ----------------------------------- RECIBO ON DEMAND (1 SOLA VEZ) ---------------------------------------------
-
-class GenerateReciboUnaSolaVezOnDemandView(LoginRequiredMixin, EnvContextMixin, FormView):
-    template_name = 'recibos/generate_recibo_una_sola_vez.html'
-    form_class = ReciboOnDemandForm
-    success_url = reverse_lazy('pdf_generated')
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
-    def form_valid(self, form):
-        data = form.cleaned_data
-        current_year = datetime.datetime.now().year
-        day = datetime.datetime.now().day
-        meses = [
-            "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
-            "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"
-        ]
-        month = meses[(datetime.datetime.now().month) - 1]
-        tenant_name = data['name']
-        precio = "{:,.2f}".format(float(data['precio'].replace(',', '')))
-        price_letters = num2words(precio.split('.')[0].replace(',', ''), lang='es')
-        concepto = data['tipo_recibo'].replace('_', ' ')
-        local = data['local']
-        subject = f"CDMX, a {day} de {month.lower()}\nde {current_year}"
-        titulo = data['titulo']
-        propiedad = data['propiedad']
-        property_type = 'local' if propiedad == 'Noche de Paz #14, Colonia Granjas Navidad, Delegación Cuajimalpa, C.P. 05219' else 'departamento'
-        text = f"Recibí de parte {'del SR.' if titulo == 'SR.' else 'de la SRA.'} {(tenant_name).upper()}, la cantidad de ${precio} ({price_letters.upper()} PESOS 00/100 M.N.), " \
-               f"por concepto de {concepto.upper()} del {property_type} {local}, del inmueble ubicado en calle {propiedad}."
-
-        file_path = create_recibo_pdf(subject, text, month, tenant_name)
-        time.sleep(1)
-        send_emails_recibos_on_demand(files=[file_path], concepto=concepto, name=tenant_name, to_email=self.request.user.email)
-        return super().form_valid(form)
-
-# ------------------------CONVENIO DE TERMINACIÓN Y ENTREGA (1 SOLA VEZ) -----------------------------------------
-
-class GenerateConvenioTerminacionEntregaView(LoginRequiredMixin, EnvContextMixin, FormView): 
-    template_name = 'terminacion_entrega/generate_terminacion_entrega_una_sola_vez.html'
-    form_class = ConvenioTerminacionEntregaForm
-    success_url = reverse_lazy('pdf_generated')
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
-    def form_valid(self, form):
-        data = form.cleaned_data
-        current_year = datetime.datetime.now().year
-        day = datetime.datetime.now().day
-        meses = [
-            "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
-            "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"
-        ]
-        month = meses[(datetime.datetime.now().month) - 1]
-        titulo = data['titulo'].replace('.', '')
-        tenant_name = data['name']
-        local = data['local']
-        subject = f"CIUDAD DE MÉXICO, A {day} DE {month.upper()} DE {current_year}\n"
-        fecha_hoy = f"{day} DE {month} DE {current_year}"
-        comienzo_contrato = data['comienzo_contrato']
-        terminacion_contrato = data['terminacion_contrato']
-        duracion_contrato = datetime.datetime.strptime(terminacion_contrato, '%d/%m/%Y').year - datetime.datetime.strptime(comienzo_contrato, '%d/%m/%Y').year
-
-        propiedad = data['propiedad']
-        property_type = 'local' if propiedad == 'Noche de Paz #14, Colonia Granjas Navidad, Delegación Cuajimalpa, C.P. 05219' else 'departamento'
-        
-        item_dict = {
-            'titulo_arrendatario': titulo,
-            'subject': subject,
-            'nombre_arrendatario': (tenant_name).upper(),
-            'local': local,
-            'propiedad': propiedad,
-            'property_type': property_type,
-            'fecha_hoy': fecha_hoy,
-            'duracion_contrato': f'{duracion_contrato} AÑO(S)',
-            'comienzo_contrato': comienzo_contrato,
-            'terminacion_contrato': terminacion_contrato,
-        }
-
-        file_path = create_terminacion_entrega_pdf(item_dict)
-        time.sleep(1)
-        send_emails_recibos_on_demand(files=[file_path], concepto='Convenio_Terminacion_Entrega', name=tenant_name, to_email=self.request.user.email)
-        return super().form_valid(form)

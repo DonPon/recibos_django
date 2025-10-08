@@ -41,11 +41,11 @@
     <div class="container">
         <h2>Eliminar Contrato</h2>
         <p>Estas seguro que deseas eliminar contrato <strong>{{ contract.nombre_arrendatario }}</strong>?</p>
-        <form method="post" action="{% url 'delete_contract' id=contract.id %}">
+        <form method="post" action="{% url 'contratos:delete_contract' id=contract.id %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger">Eliminar</button>
         </form>
-        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary">Cancelar</a>
+        <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-secondary">Cancelar</a>
     </div>
 </body>
 </html>
