@@ -132,12 +132,51 @@ def send_emails_recibos(files, month, to_email):
     """
     # Compose the email
     subject = f"Recibos {month.upper()}"
-    body = f"Recibos para el mes de {month}"
+        # HTML body for the email
+    body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                color: #333;
+                padding: 20px;
+            }}
+            h1 {{
+                color: #4CAF50;
+                text-align: justify;
+            }}
+            p {{
+                font-size: 16px;
+                line-height: 1.5;
+                text-align: justify;
+            }}
+            .footer {{
+                margin-top: 20px;
+                text-align: center;
+                font-size: 14px;
+                color: #777;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Recibos del mes de {month.capitalize()}</h1>
+        <p>
+            Recibos correspondientes al mes de <strong>{month.capitalize()}</strong>.
+        </p>
+        <div class="footer">
+            <p>Correo enviado automáticamente ✨</p>
+        </div>
+    </body>
+    </html>
+    """
 
     if isinstance(files, str):
         files = [files]
 
-    send_email(subject=subject, body=body, to_email=to_email, file_paths=files)
+    send_email(subject=subject, body=body, to_email=to_email, file_paths=files, is_html=True)
 
 def old_create_contract_pdf(item_dict):
     """
@@ -284,10 +323,51 @@ def send_emails_recibos_on_demand(files, concepto, name, to_email):
         to_email (str): The recipient's email address.
     """
     # Compose the email
-    subject = f"Recibo {concepto.upper()} - {name.upper()}"
-    body = f"Recibo {concepto.upper()} - {name.upper()}."
+    subject = f"{concepto.upper()} - {name.upper()}"
+        # HTML body for the email
+    body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                color: #333;
+                padding: 20px;
+            }}
+            h1 {{
+                color: #4CAF50;
+                text-align: justify;
+            }}
+            p {{
+                font-size: 16px;
+                line-height: 1.5;
+                text-align: justify;
+            }}
+            .footer {{
+                margin-top: 20px;
+                text-align: center;
+                font-size: 14px;
+                color: #777;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>{concepto.capitalize()}</h1>
+        <p>
+            
+            Envío de documento <strong>{concepto.capitalize()}</strong>.
+        </p>
+        <div class="footer">
+            <p>Correo enviado automáticamente ✨</p>
+        </div>
+    </body>
+    </html>
+    """
 
     if isinstance(files, str):
         files = [files]
 
-    send_email(subject=subject, body=body, to_email=to_email, file_paths=files)
+    send_email(subject=subject, body=body, to_email=to_email, file_paths=files, is_html=True)
+

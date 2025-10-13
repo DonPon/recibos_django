@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'recibos',
     'contratos',
     'on_demand',
+    'newsletter',
 ]
 
 MIDDLEWARE = [
