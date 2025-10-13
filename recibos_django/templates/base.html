@@ -5,24 +5,23 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Contratos{% endblock %}</title>
+    <title>{% block title %}Recibos{% endblock %}</title>
 
 
     <style>
         body {
-            background-color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensure the body takes up the full height of the viewport */
             margin: 0;
-            padding: 0;
         }
-
         header {
             background: linear-gradient(to right, #815ee0 , #d6659e);
             color: white;
             text-align: center;
             padding: 1rem;
         }
-
+    
         main {
             display: flex;
             flex-wrap: wrap;
@@ -30,6 +29,7 @@
             padding: 1rem;
             margin-bottom: 60px; /* Adjusted margin to prevent footer from overlapping content */
         }
+    
         .card {
             width: 100%;
             margin-bottom: 20px;
@@ -37,15 +37,20 @@
             transition: transform 0.2s;
             border: 1px solid #9ea3a5; /* Subtle border color */
             border-radius: 8px;
-            /* background: #ececec; */
         }
-
+    
         .btn-primary {
             background: linear-gradient(to right, #6f25e6, #2962ff);
             border-color: #a18dd6;  
             color: white;
         }
-
+    
+        footer {
+            background-color: #f8f9fa; /* Light gray background for the footer */
+            padding: 1rem;
+            text-align: center;
+            border-top: 1px solid #dee2e6; /* Subtle border at the top of the footer */
+        }
     </style>
 </head>
 <body>
@@ -57,7 +62,7 @@
     </main>
 
     <footer class="text-center fixed-bottom bg-light py-3">
-        <p>&copy; 2025 Franz Eckermann</p>
+        <p><small>{{ ENV }}</small> - {{ current_year }} Franz Eckermann &copy; </p>
     </footer>
 
 
