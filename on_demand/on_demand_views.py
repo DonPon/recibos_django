@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from num2words import num2words
 from django.views.generic.edit import FormView
 
-from on_demand.forms import ConvenioTerminacionEntregaForm, ReciboOnDemandForm
+from on_demand.on_demand_forms import ConvenioTerminacionEntregaForm, ReciboOnDemandForm
 from src.src_pdf_utils import create_recibo_pdf, create_terminacion_entrega_pdf, send_emails_recibos_on_demand
 from src.src_dates import parse_date_string
 

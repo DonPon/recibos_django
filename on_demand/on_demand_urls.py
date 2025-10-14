@@ -1,5 +1,5 @@
 from django.urls import path
-from on_demand.views import OnDemand_GenerateConvenioTerminacionEntregaView, OnDemand_GenerateReciboView
+from on_demand.on_demand_views import OnDemand_GenerateConvenioTerminacionEntregaView, OnDemand_GenerateReciboView
 
 app_name = 'on_demand'
 

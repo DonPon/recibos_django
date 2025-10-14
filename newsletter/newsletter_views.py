@@ -1,3 +1,5 @@
+import subprocess
+import sys
 from django.http import JsonResponse
 from django.views import View
 from django.contrib.auth.models import User
@@ -25,7 +27,7 @@ class NewsletterView(View):
             Eres un asistente experto en administración de propiedades y arrendamiento. 
             Tu tarea es generar newsletters semanales en formato HTML dirigidos a administradores de propiedades que rentan inmuebles. 
             Debes mantener un lenguaje cercano, profesional y fácil de entender. 
-            Incluye secciones claras con títulos, subtítulos y párrafos concisos, con tips prácticos y listas si aplica. 
+            Incluye secciones claras con títulos, subtítulos y párrafos concisos, con tips prácticos y listas si aplica. cada tema o seccion tiene que tener una propia tarjeta.
             No debe ser muy extenso, debe ser muy resumido. 
             El resultado debe ser listo para enviar como email HTML con letra MUY grande y optimizado para el celular. (pero no incluyas al principio ```html ni al final ```).
             No incluyas el asunto del email ni tampoco informacion adicional, tu ve directamente al grano con el contenido del newsletter.
@@ -59,6 +61,8 @@ class NewsletterView(View):
             - 🌲 Al aire libre  
             - 🔥 Destacados del finde  
 
+            cada evento tiene que tener una propia tarjeta.
+
             Usa párrafos cortos, listas breves cuando sea útil, y emojis donde encajen.  
             No inventes información ni pongas eventos genéricos.  
             No incluyas el asunto del correo ni información adicional; solo el contenido HTML del newsletter.
@@ -83,7 +87,7 @@ class NewsletterView(View):
             newsletter_status_franz, newsletter_text_franz = ask_gemini(prompt=prompt_franz, instructions=instructions_franz)
 
             # Send the emails
-            send_email(subject="Newsletter", body=newsletter_text_gaby, to_email=to_email_gaby, is_html=True, cc_email=False)
+            send_email(subject="Boletin Semanal", body=newsletter_text_gaby, to_email=to_email_gaby, is_html=True, cc_email=False)
             send_email(subject="Newsletter", body=newsletter_text_franz, to_email=to_email_franz, is_html=True, cc_email=False)
 
             # Return a success response

@@ -13,8 +13,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from num2words import num2words
 from django.views import View
 
-from contratos.models import Contract
-from contratos.forms import LocalComercialForm, DepartamentoForm
+from contratos.contratos_models import Contract
+from contratos.contratos_forms import LocalComercialForm, DepartamentoForm
 from src.src_email import send_email
 from src.src_pdf_utils import create_contract_pdf, send_emails_contracts
 from src.src_dates import parse_date_string, flag_one_month_to_date

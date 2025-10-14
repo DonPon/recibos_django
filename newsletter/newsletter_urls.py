@@ -1,5 +1,5 @@
 from django.urls import path
-from newsletter.views import NewsletterView
+from newsletter.newsletter_views import NewsletterView
 
 app_name = 'newsletter'
 

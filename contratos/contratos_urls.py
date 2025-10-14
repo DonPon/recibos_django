@@ -1,6 +1,6 @@
 # contratos/urls.py
 from django.urls import path
-from contratos.views import (Contratos_ContractListView, Contratos_UpdateContractView, 
+from contratos.contratos_views import (Contratos_ContractListView, Contratos_UpdateContractView, 
                              Contratos_AddContractView, Contratos_DeleteContractView, 
                              Contratos_ReminderView, Contratos_CreateContractPDFView)
 

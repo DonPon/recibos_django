@@ -1,6 +1,6 @@
 # contratos/forms.py
 from django import forms
-from contratos.models import Contract
+from contratos.contratos_models import Contract
 
 
 class BaseContractForm(forms.ModelForm):
