@@ -1,12 +1,15 @@
 import subprocess
+import threading
 import sys
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.views import View
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 
 from src.src_email import send_email
 from src.ai_utils import ask_gemini, ask_apertus
+from recibos_django.mixins import EnvContextMixin
 
 # Calcular próximo viernes a domingo
 today = date.today()
@@ -15,13 +18,45 @@ friday = today + timedelta(days=days_until_friday)
 sunday = friday + timedelta(days=2)
 date_range_str = f"del {friday.strftime('%d/%m/%Y')} al {sunday.strftime('%d/%m/%Y')}"
 
-class NewsletterView(View):
+NEWSLETTERS = [
+    {"id": 1, "title": "Boletín Semanal de Propiedades CDMX", "recipient": "gaby"},
+    {"id": 2, "title": "Zurich Weekend Newsletter", "recipient": "franz"},
+]
+
+class NewsletterView(View, EnvContextMixin):
     def get(self, request):
+        # Display a list of newsletters
+        return render(request, 'newsletter_list.html', {"newsletters": NEWSLETTERS})
+
+    def post(self, request, newsletter_id=None):
         try:
             # Get the email addresses of the users
-            to_email_gaby = User.objects.get(username='gaby').email
+            to_email_gaby = User.objects.get(username='franz').email
             to_email_franz = User.objects.get(username='franz').email
 
+            # Generate and send newsletters
+            if newsletter_id:
+                # Send a specific newsletter
+                newsletter = next((n for n in NEWSLETTERS if n["id"] == int(newsletter_id)), None)
+                if not newsletter:
+                    return JsonResponse({"status": "error", "message": "Newsletter not found."}, status=404)
+
+                if newsletter["recipient"] == "gaby":
+                    self.send_newsletter_gaby(to_email_gaby)
+                elif newsletter["recipient"] == "franz":
+                    self.send_newsletter_franz(to_email_franz)
+            else:
+                # Send all newsletters
+                self.send_newsletter_gaby(to_email_gaby)
+                self.send_newsletter_franz(to_email_franz)
+
+            return JsonResponse({"status": "success", "message": "Newsletter(s) sent successfully."}, status=200)
+        except Exception as e:
+            # Handle any errors and return a failure response
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+    def send_newsletter_gaby(self, to_email):
             # Instrucciones y prompt for Gaby
             instructions_gaby = """
             Eres un asistente experto en administración de propiedades y arrendamiento. 
@@ -31,6 +66,109 @@ class NewsletterView(View):
             No debe ser muy extenso, debe ser muy resumido. 
             El resultado debe ser listo para enviar como email HTML con letra MUY grande y optimizado para el celular. (pero no incluyas al principio ```html ni al final ```).
             No incluyas el asunto del email ni tampoco informacion adicional, tu ve directamente al grano con el contenido del newsletter.
+            
+            ### 🎨 FORMATO HTML FIJO!
+            El resultado debe ser **un solo bloque HTML completo**, utilizando **exactamente** la siguiente estructura:
+
+            html
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Boletin Semanal de propiedades CDMX.</title>
+            <style>
+            body {{
+                font-family: 'Helvetica Neue', Arial, sans-serif;
+                background-color: #f7f7f7;
+                margin: 0;
+                padding: 0;
+                color: #222;
+            }}
+            .container {{
+                max-width: 600px;
+                margin: auto;
+                background-color: #fff;
+                border-radius: 20px;
+                padding: 20px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }}
+            h1 {{
+                text-align: center;
+                font-size: 1.8em;
+                margin-bottom: 15px;
+                color: #d32f2f;
+            }}
+            h2 {{
+                font-size: 1.4em;
+                margin-top: 25px;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 5px;
+            }}
+            p {{
+                line-height: 1.5em;
+                font-size: 1.05em;
+            }}
+            .section {{
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                margin-top: 10px;
+            }}
+            .card {{
+                background-color: #fafafa;
+                border-radius: 15px;
+                padding: 15px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            }}
+            .card-title {{
+                font-size: 1.2em;
+                font-weight: bold;
+                margin-bottom: 4px;
+            }}
+
+            .card-description {{
+                margin-top: 8px;
+                font-size: 1em;
+            }}
+            a {{
+                display: inline-block;
+                margin-top: 10px;
+                color: #1565c0;
+                text-decoration: none;
+                font-weight: bold;
+            }}
+            a:hover {{
+                text-decoration: underline;
+            }}
+            .closing-line {{
+                text-align: center;
+                margin-top: 30px;
+                font-style: italic;
+                color: #444;
+            }}
+            </style>
+            </head>
+            <body>
+            <div class="container">
+                <h1>Boletin Semanal de propiedades CDMX.</h1>
+                <p>/p>
+
+                <!-- Secciones (Mantener formato y orden) -->
+                <h2>titulo de seccion con emoji</h2>
+                <div class="section">
+                    <div class="card">
+                        <h3 class="card-title"></h3>
+                        <p class="card-description"></p>
+                    </div>
+                </div>
+
+                <!-- Y así el formato para todas las secciones y los artículos -->
+
+                <p class="closing-line">¡Esperamos que encuentres útil esta información! 😉 - Tu app de recibos.</p>
+            </div>
+            </body>
+            </html>
             """
 
             prompt_gaby = """
@@ -41,58 +179,187 @@ class NewsletterView(View):
             4. Tips de mantenimiento preventivo y gestión eficiente de inquilinos.
             Agrega un título atractivo, un resumen inicial y subtítulos para cada sección.
             """
-
-            # Instrucciones y prompt for Franz
-            instructions_franz = f"""
-            Eres un asistente experto en ocio, cultura y eventos en Suiza, con acceso a internet. 
-            Tu tarea es buscar información actual en línea sobre eventos y actividades en Zúrich y alrededores 
-            específicamente para el próximo fin de semana ({date_range_str}).  
-            Usa fuentes confiables como hellozurich.ch, zurich.ch, Eventbrite, Ticketcorner, etc.  
-            Incluye únicamente eventos reales y confirmados con nombre, lugar, fecha y breve descripción.  
-
-            Después de hacer la búsqueda, genera un newsletter HTML optimizado para celular, 
-            con letra MUY grande, formato limpio y visualmente atractivo (NO INCLUYAS ```html ni ``` al final).  
-
-            El tono debe ser cercano, divertido y natural, con un toque elegante suizo.  
-            Incluye secciones con subtítulos llamativos como:  
-            - 🎶 Conciertos y música  
-            - 🎨 Cultura y arte  
-            - 🍷 Plan relax  
-            - 🌲 Al aire libre  
-            - 🔥 Destacados del finde  
-
-            cada evento tiene que tener una propia tarjeta.
-
-            Usa párrafos cortos, listas breves cuando sea útil, y emojis donde encajen.  
-            No inventes información ni pongas eventos genéricos.  
-            No incluyas el asunto del correo ni información adicional; solo el contenido HTML del newsletter.
-            """
-
-            prompt_franz = f"""
-            Haz una búsqueda en internet para encontrar los mejores eventos, planes y actividades en Zúrich y alrededores 
-            que ocurran el fin de semana {date_range_str}.  
-            Luego crea un newsletter en HTML con:
-            - Un título atractivo.
-            - Un breve resumen inicial.
-            - Secciones con subtítulos, nombres reales de eventos y fechas exactas.
-            - Formato optimizado para celular, con letra grande y párrafos breves.
-            - Un cierre con sugerencia o frase amable para el lector.
-
-            Ejemplo de tono: 
-            "Este finde ({date_range_str}) Zúrich se pone bueno: conciertos junto al lago, ferias gastronómicas y exposiciones que valen cada minuto 😎".
-            """
-
-            # Generar el newsletter usando instrucciones
+            
+            # Generate the newsletter
             newsletter_status_gaby, newsletter_text_gaby = ask_gemini(prompt=prompt_gaby, instructions=instructions_gaby)
-            newsletter_status_franz, newsletter_text_franz = ask_gemini(prompt=prompt_franz, instructions=instructions_franz)
 
-            # Send the emails
-            send_email(subject="Boletin Semanal", body=newsletter_text_gaby, to_email=to_email_gaby, is_html=True, cc_email=False)
-            send_email(subject="Newsletter", body=newsletter_text_franz, to_email=to_email_franz, is_html=True, cc_email=False)
+            # Send the email
+            send_email(subject="Boletin Semanal", body=newsletter_text_gaby, to_email=to_email, is_html=True, cc_email=False)
 
-            # Return a success response
-            return JsonResponse({"status": "success", "message": "Newsletter sent successfully."}, status=200)
-        except Exception as e:
-            # Handle any errors and return a failure response
-            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    def send_newsletter_franz(self, to_email):
+        # Instrucciones y prompt for Franz
+        instructions_franz = f"""
+        You are an expert assistant in leisure, culture, and gastronomy in Switzerland, with **real-time internet access**.  
+        Your task is to generate a **complete HTML newsletter with fixed structure and CSS**, featuring **real and verified events in Zurich and surroundings** happening **during the upcoming weekend ({date_range_str})**, and include **a section for hipster-style restaurant recommendations**.
+
+        ---
+
+        ### 🔍 SEARCH RULES
+        - Only include **real, current, and verifiable events**.
+        - Do **not invent or fill in fake information**.
+        - Use only **trusted and official sources**, such as:
+        - hellozurich.ch  
+        - zuerich.com / zuerich.ch  
+        - https://www.zuerich.com/en/events-nightlife/event-calendar
+        - https://www.newlyswissed.com/feed/
+        - Eventbrite  
+        - Ticketcorner  
+        - Zurich Tourism  
+        - Local.ch / Eventfinda  
+        - Official restaurant websites (for restaurant recommendations)
+        - **Each event must include its official or source link.**
+        - **Each restaurant must include a direct and verifiable link to its official website or listing.**
+        - Avoid duplicates or repeated events.
+        - If a section has no real results, **omit that section entirely** (do not invent content).
+
+        ---
+
+        ### 🎨 FIXED HTML FORMAT
+        The output must be **a single full HTML block**, using **exactly** the following structure:
+
+        html
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Zurich Weekend Newsletter</title>
+        <style>
+        body {{
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            color: #222;
+        }}
+        .container {{
+            max-width: 600px;
+            margin: auto;
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }}
+        h1 {{
+            text-align: center;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #d32f2f;
+        }}
+        h2 {{
+            font-size: 1.4em;
+            margin-top: 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }}
+        p {{
+            line-height: 1.5em;
+            font-size: 1.05em;
+        }}
+        .events-section {{
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 10px;
+        }}
+        .event-card {{
+            background-color: #fafafa;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }}
+        .event-title {{
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }}
+        .event-place, .event-date, .event-time {{
+            font-size: 0.95em;
+            color: #666;
+            margin: 2px 0;
+        }}
+        .event-description {{
+            margin-top: 8px;
+            font-size: 1em;
+        }}
+        a {{
+            display: inline-block;
+            margin-top: 10px;
+            color: #1565c0;
+            text-decoration: none;
+            font-weight: bold;
+        }}
+        a:hover {{
+            text-decoration: underline;
+        }}
+        .closing-line {{
+            text-align: center;
+            margin-top: 30px;
+            font-style: italic;
+            color: #444;
+        }}
+        </style>
+        </head>
+        <body>
+        <div class="container">
+            <h1>Zurich is ON! 🇨🇭</h1>
+            <p>This weekend ({date_range_str}), Zurich comes alive with live music, art, urban markets, and hipster cafés where time slows down ☕.</p>
+
+            <!-- Sections (keep order and format) -->
+            <h2>☕ Hipster Picks</h2>
+            <div class="events-section">
+                <div class="event-card">
+                    <h3 class="event-title">Place Name</h3>
+                    <p class="event-place">Neighborhood or area</p>
+                    <p class="event-description">Description of the place and its vibe (hipster, chill, artsy, etc.)</p>
+                    <a href="..." target="_blank">Visit website 🔗</a>
+                </div>
+            </div>
+
+            <h2>🎶 Concerts & Music</h2>
+            <div class="events-section">
+                <div class="event-card">
+                    <h3 class="event-title">Event Title</h3>
+                    <p class="event-place">Venue</p>
+                    <p class="event-date">Date</p>
+                    <p class="event-time">Time</p>
+                    <p class="event-description">Brief and natural description.</p>
+                    <a href="..." target="_blank">More info 🔗</a>
+                </div>
+            </div>
+
+            <!-- Repeat same structure for: Culture & Art, Chill Plans, Outdoor, Weekend Highlights -->
+
+            <p class="closing-line">Enjoy your weekend in Zurich with style and good vibes! 😉</p>
+        </div>
+        </body>
+        </html>
+        """
+
+        # Prompt Franz
+        prompt_franz = f"""
+        Search online in real time for the **best real and verified events, activities, and restaurants**
+        happening in **Zurich and nearby areas during the weekend {date_range_str}**.
+
+        Then generate a **complete HTML newsletter** strictly following the format and sections defined in the instructions.
+
+        The HTML must include:
+        - A main header `<h1>` (e.g. "Zurich is ON! 🇨🇭")
+        - A short and natural introductory paragraph.
+        - All sections with their subtitles, in the defined order.
+        - A section for **hipster restaurant recommendations**, each with a real and verifiable website link (needs to exist).
+        - Multiple `.event-card` blocks with verified information.
+        - A short and friendly closing line like “Enjoy your weekend in Zurich with style! 😉”.
+
+        Do not include anything outside the HTML.  
+        Do not generate any extra text.
+        """
+
+                # Generate the newsletter
         
+        # Generate the newsletter
+        newsletter_status_franz, newsletter_text_franz = ask_gemini(prompt=prompt_franz, instructions=instructions_franz)
+
+        # Send the email
+        send_email(subject="Zurich Weekend Newsletter", body=newsletter_text_franz, to_email=to_email, is_html=True, cc_email=False)
