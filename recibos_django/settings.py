@@ -28,11 +28,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dd9+#ubg=zw^+e#-510sutmgk63jq4(_gt(iea3-y*sb2plob$'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 try:
-    if os.getenv('ENV') == 'TEST':
+    if os.getenv('ENV').lower() == 'test':
         DEBUG = True
     else:
         DEBUG = False
@@ -52,6 +52,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'recibos',
+    'contratos',
+    'on_demand',
+    'newsletter',
 ]
 
 MIDDLEWARE = [
@@ -69,7 +72,7 @@ ROOT_URLCONF = 'recibos_django.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'recibos_django', 'templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -88,28 +91,30 @@ WSGI_APPLICATION = 'recibos_django.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-"""DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}"""
 
 import dj_database_url
 
 DB = {
-        'elephantsql': dj_database_url.parse('postgres://hgokxebu:95LRot5Dn-p3hUI2NWYQjJH_t4x3lnOS@flora.db.elephantsql.com/hgokxebu'),
         'neon': dj_database_url.parse(os.getenv('DATABASE_URL')),
+        'pythonanywhere': {
+            'ENGINE': os.getenv("ENGINE"),
+            'NAME': os.getenv("NAME"),
+            'USER': os.getenv("USER"),
+            'PASSWORD': os.getenv("PASSWORD"),
+            'HOST': os.getenv("HOST"),
+            'PORT': os.getenv("PORT"),
+        },
 }
 
-DATABASES = {
-    'default': DB['neon'],
-}
-# PostgreSQL from render.com:
-# postgres://productiondatabase_efvp_user:TkHJqJvutRgI0sWdmxRyt4TJ9Ca5gs9T@dpg-clnl3bde89qs739hpva0-a.frankfurt-postgres.render.com/productiondatabase_efvp
+if os.getenv("ENV").lower() == "prod":
+    DATABASES = {
+        'default': DB['pythonanywhere'],
+    }
+else:
+    DATABASES = {
+        'default': DB['neon'],
+    }
 
-# PostrgreSQL from elephant free:
-# postgres://hgokxebu:95LRot5Dn-p3hUI2NWYQjJH_t4x3lnOS@flora.db.elephantsql.com/hgokxebu
 
 # Postgres NEON free:
 # postgresql://recibos_django_db_owner:i3xBlyV4KZJn@ep-misty-cake-a2jdw1by.eu-central-1.aws.neon.tech/recibos_django_db?sslmode=require
@@ -150,11 +155,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 #MEDIA_ROOT = os.path.join(BASE_DIR, 'tmp')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# Only for production
+if not DEBUG:
+    # STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

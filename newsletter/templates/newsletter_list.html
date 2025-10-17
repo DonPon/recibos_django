@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Newsletter List{% endblock %}
+
+{% block header %}
+<h1>Newsletter Management</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center my-4">Newsletters</h2>
+    <ul class="list-group">
+        {% for newsletter in newsletters %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>{{ newsletter.title }}</strong>
+            <form action="{% url 'newsletter:send_newsletter' newsletter.id %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-sm">Send</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    <form action="{% url 'newsletter:send_all_newsletters' %}" method="post" class="mt-4 text-center">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Send All Newsletters</button>
+    </form>
+</div>
+{% endblock %}

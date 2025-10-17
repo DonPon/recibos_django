@@ -41,11 +41,11 @@
     <div class="container">
         <h2>Eliminar Inquilino</h2>
         <p>Estas seguro que deseas eliminar inquilino <strong>{{ tenant.name }}</strong>?</p>
-        <form method="post" action="{% url 'delete_tenant' tenant.name %}">
+        <form method="post" action="{% url 'recibos:delete_tenant' tenant.name %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger">Eliminar</button>
         </form>
-        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary">Cancelar</a>
+        <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-secondary">Cancelar</a>
     </div>
 </body>
 </html>

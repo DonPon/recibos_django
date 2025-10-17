@@ -1,5 +1,5 @@
 <!-- update_tenants.html -->
-{% extends 'recibos/base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Generador de Recibos{% endblock %}
 
@@ -68,11 +68,11 @@
         En esta sección podrás editar tus inquilinos
                     <!-- Buttons customization -->
                     <div class="d-flex mt-3">
-                        <a href="{% url 'generate_pdfs' %}" class="btn btn-outline-primary btn-sm">
+                        <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-arrow-left"></i> ← Atrás
                         </a>
                         <div class="flex-grow-1 ml-2">
-                            <a href="{% url 'add_tenant' %}" class="btn btn-success btn-block">
+                            <a href="{% url 'recibos:add_tenant' %}" class="btn btn-success btn-block">
                                 &#43;  Nuevo Inquilino
                             </a>
                         </div>
@@ -90,15 +90,15 @@
                     <div class="row">
                         <div class="col-md-6"></div>
                         <div class="col-md-6">
-                            <a href="{% url 'update_tenant' tenant_name=tenant.name %}" class="btn btn-primary btn-block">Editar</a>
-                            <a href="{% url 'delete_tenant' tenant_name=tenant.name %}" class="btn btn-outline-danger btn-block mt-2">Borrar</a>
+                            <a href="{% url 'recibos:update_tenant' tenant_name=tenant.name %}" class="btn btn-primary btn-block">Editar</a>
+                            <a href="{% url 'recibos:delete_tenant' tenant_name=tenant.name %}" class="btn btn-outline-danger btn-block mt-2">Borrar</a>
                         </div>
                     </div>
                 </div>
             </div>
         {% endfor %}
 
-        <a href="{% url 'generate_pdfs' %}" class="btn btn-secondary btn-block mt-3">← Atrás</a>
+        <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-secondary btn-block mt-3">← Atrás</a>
     </div>
 
 </body>

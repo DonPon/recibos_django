@@ -52,13 +52,13 @@
                 <h3 class="card-title">Nuevo Inquilino</h3>
             </div>
             <div class="card-body">
-                <form method="post" action="{% url 'add_tenant' %}">
+                <form method="post" action="{% url 'recibos:add_tenant' %}">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <button type="submit" class="btn btn-success btn-block">Guardar</button>
                 </form>
                 <br>
-                <a href="{% url 'update_tenants' %}" class="btn btn-secondary btn-block">← Cancelar</a>
+                <a href="{% url 'recibos:update_tenants' %}" class="btn btn-secondary btn-block">← Cancelar</a>
             </div>
         </div>
     </div>

@@ -4,10 +4,10 @@
 <div class="container mt-5">
     <div class="card">
         <div class="card-header">
-            <h1>Generar Recibo Una Sola Vez</h1>
+            <h1>Generar Convenio Terminación/Entrega</h1>
         </div>
         <div class="card-body">
-            <form method="post" action="{% url 'on_demand:generate_recibo_on_demand' %}">
+            <form method="post" action="{% url 'on_demand:generate_terminacion_entrega_una_sola_vez' %}">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="titulo">Título</label>
@@ -19,20 +19,6 @@
                 <div class="form-group">
                     <label for="name">Nombre del inquilino</label>
                     <input type="text" id="name" name="name" class="form-control" placeholder="Ingrese el nombre completo del inquilino" required>
-                </div>
-                <div class="form-group">
-                    <label for="precio">Monto</label>
-                    <input type="text" id="precio" name="precio" class="form-control" placeholder="Ej. 6,500.00" required>
-                </div>
-                <div class="form-group">
-                    <label for="tipo_recibo">Tipo de Recibo</label>
-                    <select id="tipo_recibo" name="tipo_recibo" class="form-control" required>
-                        <option value="deposito">DEPÓSITO</option>
-                        <option value="anticipo">ANTICIPO</option>
-                        <option value="apartado">APARTADO</option>
-                        <option value="renta">RENTA</option>
-                        <option value="devolucion de deposito">DEVOLUCIÓN DE DEPÓSITO</option>
-                    </select>
                 </div>
                 <div class="form-group">
                     <label for="propiedad">Propiedad</label>
@@ -49,7 +35,16 @@
                     <label for="local">Local/depto.</label>
                     <input type="text" id="local" name="local" class="form-control" placeholder="Ej. 5D, C, etc." required>
                 </div>
-                <button type="submit" class="btn btn-primary">Generar Recibo</button>
+                <div class="form-group">
+                    <label for="comienzo_contrato">Fecha de inicio del contrato</label>
+                    <input type="text" id="comienzo_contrato" name="comienzo_contrato" class="form-control" placeholder="Ej. 15/05/2023" required>
+                </div>
+                <div class="form-group">
+                    <label for="terminacion_contrato">Fecha de terminación del contrato</label>
+                    <input type="text" id="terminacion_contrato" name="terminacion_contrato" class="form-control" placeholder="Ej. 14/05/2024" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Generar Convenio</button>
             </form>
             <br><div class="d-flex mt-3">
                 <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-outline-primary btn-sm">

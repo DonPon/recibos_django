@@ -1,0 +1,83 @@
+<!-- add_tenant.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Contrato</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Add Bootstrap CDN links here if not included in your project -->
+    <!-- For example: -->
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
+    <style>
+        body {
+            background-color: #edeef0; /* Light grayish-blue background */
+        }
+        .container {
+            margin-top: 20px;
+            margin-bottom: 100px;
+        }
+        .card {
+            width: 100%;
+            margin: auto;
+            
+        }
+        .card-header {
+            background: linear-gradient(to right, #815ee0 , #d6659e);
+            color: #fff;
+            font-size: 18px;
+        }
+        .card-body {
+            background-color: #fff; /* White card body */
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-size: 16px;
+        }
+        input {
+            width: 100%;
+            font-size: 16px;
+        }
+        .btn-primary {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header">
+                <h3 class="card-title">Nuevo Contrato</h3>
+            </div>
+            <div class="card-body">
+
+                {% if not contract_type %}
+                <div id="contract-selection">
+                    <h2>Seleccione el tipo de contrato:</h2>
+                    <form method="get" action="">
+                        <button type="submit" name="contract_type" value="local_comercial" class="btn btn-primary btn-block">Local Comercial</button>
+                        <button type="submit" name="contract_type" value="departamento" class="btn btn-primary btn-block">Departamento</button>
+                    </form>
+                </div>
+                {% endif %}
+
+                {% if contract_type %}
+                <form method="post" action="{% url 'contratos:add_contract' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-success btn-block">Guardar</button>
+                </form>
+                {% endif %}
+                <br>
+                <a href="{% url 'contratos:all_contracts' %}" class="btn btn-secondary btn-block">← Cancelar</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
