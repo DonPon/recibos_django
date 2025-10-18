@@ -13,6 +13,7 @@ def ask_gemini(prompt: str, instructions: str = None, api_key=GEMINI_API_KEY):
     """
     Envía un prompt al modelo Gemini y devuelve respuesta y status.
     Si se pasan 'instructions', se incluyen como rol de administrador para guiar la respuesta.
+    otro modelo chido es: gemini-2.5-flash-lite
     """
     url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
     headers = {

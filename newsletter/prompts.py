@@ -248,10 +248,10 @@ a:hover {{
 <body>
 <div class="container">
     <h1>Zurich is ON! 🇨🇭</h1>
-    <p>This weekend ({date_range_str}), Zurich comes alive with live music, art, urban markets, and hipster cafés where time slows down ☕.</p>
+    <p>This weekend ({date_range_str}), Zurich comes alive with live music, art, urban markets, and hipster restaurants where time slows down.</p>
 
     <!-- Sections (keep order and format) -->
-    <h2>☕ Hipster Picks</h2>
+    <h2>Hipster restaurants and cafés Picks</h2>
     <div class="events-section">
         <div class="event-card">
             <h3 class="event-title">Place Name</h3>
@@ -292,7 +292,7 @@ The HTML must include:
 - A main header `<h1>` (e.g. "Zurich is ON! 🇨🇭")
 - A short and natural introductory paragraph.
 - All sections with their subtitles, in the defined order.
-- A section for **hipster restaurant recommendations**, each with a real and verifiable website link (needs to exist).
+- A section for **hipster restaurant recommendations**, each with a real and verifiable website link (needs to exist) - choose minimum 3 and randomize to give variety.
 - Multiple `.event-card` blocks with verified information.
 - A short and friendly closing line like “Enjoy your weekend in Zurich with style! 😉”.
 
