@@ -23,7 +23,7 @@ class NewsletterView(View, EnvContextMixin):
         # Check if the request is to send all newsletters
         if 'send/all/' in request.path:
             try:
-                to_email_gaby = User.objects.get(username='franz').email
+                to_email_gaby = User.objects.get(username='gaby').email
                 to_email_franz = User.objects.get(username='franz').email
 
                 self.send_newsletter_gaby(to_email_gaby)
@@ -38,7 +38,7 @@ class NewsletterView(View, EnvContextMixin):
         if newsletter_id:
             try:
                 # Get the email addresses of the users
-                to_email_gaby = User.objects.get(username='franz').email
+                to_email_gaby = User.objects.get(username='gaby').email
                 to_email_franz = User.objects.get(username='franz').email
 
                 # Send a specific newsletter
