@@ -19,36 +19,47 @@ NEWSLETTERS = [
 ]
 
 class NewsletterView(View, EnvContextMixin):
-    def get(self, request):
-        # Display a list of newsletters
-        return render(request, 'newsletter_list.html', {"newsletters": NEWSLETTERS})
+    def get(self, request, newsletter_id=None):
+        # Check if the request is to send all newsletters
+        if 'send/all/' in request.path:
+            try:
+                to_email_gaby = User.objects.get(username='franz').email
+                to_email_franz = User.objects.get(username='franz').email
 
-    def post(self, request, newsletter_id=None):
-        try:
-            # Get the email addresses of the users
-            to_email_gaby = User.objects.get(username='gaby').email
-            to_email_franz = User.objects.get(username='franz').email
+                self.send_newsletter_gaby(to_email_gaby)
+                self.send_newsletter_franz(to_email_franz)
 
-            # Generate and send newsletters
-            if newsletter_id:
+                return JsonResponse({"status": "success", "message": "All newsletters sent successfully."},
+                                    status=200)
+            except Exception as e:
+                return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+        # Check if a newsletter_id is provided to send a specific newsletter
+        if newsletter_id:
+            try:
+                # Get the email addresses of the users
+                to_email_gaby = User.objects.get(username='franz').email
+                to_email_franz = User.objects.get(username='franz').email
+
                 # Send a specific newsletter
                 newsletter = next((n for n in NEWSLETTERS if n["id"] == int(newsletter_id)), None)
                 if not newsletter:
-                    return JsonResponse({"status": "error", "message": "Newsletter not found."}, status=404)
+                    return JsonResponse({"status": "error", "message": "Newsletter not found."},
+                                        status=404)
 
                 if newsletter["recipient"] == "gaby":
                     self.send_newsletter_gaby(to_email_gaby)
                 elif newsletter["recipient"] == "franz":
                     self.send_newsletter_franz(to_email_franz)
-            else:
-                # Send all newsletters
-                self.send_newsletter_gaby(to_email_gaby)
-                self.send_newsletter_franz(to_email_franz)
-
-            return JsonResponse({"status": "success", "message": "Newsletter(s) sent successfully."}, status=200)
-        except Exception as e:
-            # Handle any errors and return a failure response
-            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+                
+                return JsonResponse({"status": "success", "message": f"Newsletter '{newsletter['title']}' sent successfully."},
+                                    status=200)
+            except Exception as e:
+                # Handle any errors and return a failure response
+                return JsonResponse({"status": "error", "message": str(e)}, status=500)
+        
+        # If no newsletter_id is provided, display the list of newsletters
+        return render(request, 'newsletter_list.html', {"newsletters": NEWSLETTERS})
 
 
     def send_newsletter_gaby(self, to_email):

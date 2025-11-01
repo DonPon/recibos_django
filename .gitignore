@@ -24,3 +24,4 @@ recibos/src/__pycache__/
 # Ignore all __pycache__ folders
 **/__pycache__/
 requirements_old.txt
+GEMINI.md

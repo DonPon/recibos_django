@@ -13,16 +13,34 @@
         {% for newsletter in newsletters %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <strong>{{ newsletter.title }}</strong>
-            <form action="{% url 'newsletter:send_newsletter' newsletter.id %}" method="post" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary btn-sm">Send</button>
-            </form>
+            <a href="{% url 'newsletter:send_newsletter' newsletter.id %}" class="btn btn-primary btn-sm send-link">Send</a>
         </li>
         {% endfor %}
     </ul>
-    <form action="{% url 'newsletter:send_all_newsletters' %}" method="post" class="mt-4 text-center">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-success">Send All Newsletters</button>
-    </form>
+    <div class="mt-4 text-center">
+        <a href="{% url 'newsletter:send_all_newsletters' %}" class="btn btn-success send-link">Send All Newsletters</a>
+    </div>
 </div>
+
+<script>
+    document.querySelectorAll('.send-link').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            const url = this.href;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An unexpected error occurred.');
+                });
+        });
+    });
+</script>
 {% endblock %}
