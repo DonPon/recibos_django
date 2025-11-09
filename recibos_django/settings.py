@@ -92,11 +92,12 @@ WSGI_APPLICATION = 'recibos_django.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 
-import dj_database_url
-
 DB = {
-        'neon': dj_database_url.parse(os.getenv('DATABASE_URL')),
-        'pythonanywhere': {
+    'test_db': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, os.getenv('DATABASE_URL')),
+    },        
+    'pythonanywhere': {
             'ENGINE': os.getenv("ENGINE"),
             'NAME': os.getenv("NAME"),
             'USER': os.getenv("USER"),
@@ -112,7 +113,7 @@ if os.getenv("ENV").lower() == "prod":
     }
 else:
     DATABASES = {
-        'default': DB['neon'],
+        'default': DB['test_db'],
     }
 
 
