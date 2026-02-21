@@ -1,5 +1,6 @@
 import os
 import time
+import logging
 import datetime
 from django.shortcuts import redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseServerError, JsonResponse
@@ -19,6 +20,9 @@ from src.src_dates import parse_date_string, flag_one_month_to_date
 
 from recibos_django.mixins import EnvContextMixin, to_email, dias
 
+# Configure logger
+logger = logging.getLogger('recibos')
+
 
 
 class LoginPageView(EnvContextMixin, FormView):
@@ -32,9 +36,11 @@ class LoginPageView(EnvContextMixin, FormView):
             password=form.cleaned_data['password'],
         )
         if user is not None:
+            logger.info(f"✓ User '{user.username}' logged in successfully")
             login(self.request, user)
             return super().form_valid(form)
         else:
+            logger.warning(f"✗ Failed login attempt for username: {form.cleaned_data['username']}")
             form.add_error(None, 'Contraseña incorrecta.')
             return self.form_invalid(form)
 
@@ -49,7 +55,12 @@ class GeneratePDFsView(LoginRequiredMixin, EnvContextMixin, FormView):
         tenants = Tenant.objects.all()
         files = []
 
+        logger.info(f"=== GeneratePDFsView.form_valid() START ===")
+        logger.info(f"Month: {month}, Year: {current_year}")
+        logger.info(f"Total tenants found: {tenants.count()}")
+
         for tenant in tenants:
+            logger.debug(f"Processing tenant: {tenant.name} (Local: {tenant.local})")
             day = tenant.dia
             price = tenant.precio
             price_letters = num2words(price.split('.')[0].replace(',', ''), lang='es')
@@ -60,11 +71,39 @@ class GeneratePDFsView(LoginRequiredMixin, EnvContextMixin, FormView):
                    f"por concepto de {servicios.lower()} del local {local}, del inmueble ubicado en Calle Noche de Paz # 14 Colonia Granjas Navidad, " \
                    f"Delegación Cuajimalpa, C.P. 05219, correspondiente al mes de {month.upper()} de {current_year}."
 
-            file_path = create_recibo_pdf(subject, text, month, tenant.name)
-            files.append(file_path)
+            try:
+                file_path = create_recibo_pdf(subject, text, month, tenant.name)
+                logger.info(f"✓ PDF created successfully for {tenant.name}")
+                logger.info(f"  - File path: {file_path}")
+                logger.info(f"  - File name: {os.path.basename(file_path)}")
+                logger.debug(f"  - Full path: {os.path.abspath(file_path)}")
+                logger.debug(f"  - File exists: {os.path.exists(file_path)}")
+                logger.debug(f"  - File size: {os.path.getsize(file_path)} bytes")
+                files.append(file_path)
+            except Exception as e:
+                logger.error(f"✗ Failed to create PDF for {tenant.name}: {str(e)}", exc_info=True)
+                continue
+
+        logger.info(f"Total PDF files created: {len(files)}")
 
         time.sleep(1)
-        send_emails_recibos(files=files, month=month, to_email=self.request.user.email)
+        
+        recipient_email = self.request.user.email
+        sender_email = os.getenv('FROM_EMAIL')
+        logger.info(f"Email configuration:")
+        logger.info(f"  - Sender: {sender_email}")
+        logger.info(f"  - Recipient: {recipient_email}")
+        logger.info(f"  - Files to send: {len(files)}")
+        
+        try:
+            logger.debug(f"Attempting to send emails with {len(files)} PDF attachments...")
+            send_emails_recibos(files=files, month=month, to_email=recipient_email)
+            logger.info(f"✓ Emails sent successfully to {recipient_email}")
+            logger.info(f"=== GeneratePDFsView.form_valid() END (SUCCESS) ===")
+        except Exception as e:
+            logger.error(f"✗ Failed to send emails: {str(e)}", exc_info=True)
+            logger.info(f"=== GeneratePDFsView.form_valid() END (FAILED) ===")
+            
         return super().form_valid(form)
 
 class PdfGeneratedView(LoginRequiredMixin, EnvContextMixin, TemplateView):
@@ -76,9 +115,13 @@ class Recibos_AutomaticGeneratePDFsViewEveryMonth(EnvContextMixin, View):
 
     def get(self, request, *args, **kwargs):
         today = datetime.datetime.now()
+        logger.info(f"=== Recibos_AutomaticGeneratePDFsViewEveryMonth.get() START ===")
+        logger.info(f"Current date: {today.strftime('%Y-%m-%d %H:%M:%S')}, Day of month: {today.day}")
 
         # Only execute if is day of the month
         if today.day != 1:
+            logger.info(f"✗ Skipped - Not the 1st day of month (Current day: {today.day})")
+            logger.info(f"=== Recibos_AutomaticGeneratePDFsViewEveryMonth.get() END (SKIPPED) ===")
             return JsonResponse({"message": "No es el primer día del mes. No se generarán PDFs."}, status=200)
 
         month_dict = {
@@ -90,7 +133,12 @@ class Recibos_AutomaticGeneratePDFsViewEveryMonth(EnvContextMixin, View):
         tenants = Tenant.objects.all()
         files = []
 
+        logger.info(f"✓ Scheduled task triggered on 1st day of month")
+        logger.info(f"Month: {month}, Year: {current_year}")
+        logger.info(f"Total tenants found: {tenants.count()}")
+
         for tenant in tenants:
+            logger.debug(f"Processing tenant: {tenant.name} (Local: {tenant.local})")
             day = tenant.dia
             price = tenant.precio
             price_letters = num2words(price.split('.')[0].replace(',', ''), lang='es')
@@ -101,12 +149,34 @@ class Recibos_AutomaticGeneratePDFsViewEveryMonth(EnvContextMixin, View):
                    f"por concepto de {servicios.lower()} del local {local}, del inmueble ubicado en Calle Noche de Paz # 14 Colonia Granjas Navidad, " \
                    f"Delegación Cuajimalpa, C.P. 05219, correspondiente al mes de {month.upper()} de {current_year}."
 
-            file_path = create_recibo_pdf(subject, text, month, tenant.name)
-            files.append(file_path)
+            try:
+                file_path = create_recibo_pdf(subject, text, month, tenant.name)
+                logger.info(f"✓ PDF created successfully for {tenant.name}")
+                logger.info(f"  - File path: {file_path}")
+                logger.info(f"  - File size: {os.path.getsize(file_path)} bytes")
+                files.append(file_path)
+            except Exception as e:
+                logger.error(f"✗ Failed to create PDF for {tenant.name}: {str(e)}", exc_info=True)
+                continue
+
+        logger.info(f"Total PDF files created: {len(files)}")
 
         time.sleep(1)
-        send_emails_recibos(files=files, month=month, to_email=to_email)
-        return JsonResponse({"message": "PDFs generados y correos enviados correctamente."}, status=200)
+        
+        logger.info(f"Email configuration:")
+        logger.info(f"  - Recipient: {to_email}")
+        logger.info(f"  - Files to send: {len(files)}")
+        
+        try:
+            logger.debug(f"Attempting to send emails with {len(files)} PDF attachments...")
+            send_emails_recibos(files=files, month=month, to_email=to_email)
+            logger.info(f"✓ Emails sent successfully to {to_email}")
+            logger.info(f"=== Recibos_AutomaticGeneratePDFsViewEveryMonth.get() END (SUCCESS) ===")
+            return JsonResponse({"message": "PDFs generados y correos enviados correctamente."}, status=200)
+        except Exception as e:
+            logger.error(f"✗ Failed to send emails: {str(e)}", exc_info=True)
+            logger.info(f"=== Recibos_AutomaticGeneratePDFsViewEveryMonth.get() END (FAILED) ===")
+            return JsonResponse({"message": f"Error al enviar correos: {str(e)}"}, status=500)
 
 # -------------------------------------TENANTS-------------------------------------------------------------------
 class Recibos_TenantListView(LoginRequiredMixin, EnvContextMixin, ListView):
@@ -125,9 +195,12 @@ class Recibos_UpdateTenantView(LoginRequiredMixin, EnvContextMixin, UpdateView):
 
     def form_valid(self, form):
         tenant = form.save(commit=False)
+        original_name = tenant.name
         tenant.precio = "{:,.2f}".format(float(tenant.precio.replace(',', '')))
         tenant.servicios = tenant.servicios.lower()
         tenant.save()
+        logger.info(f"✓ Tenant updated successfully: {original_name}")
+        logger.debug(f"  - Price: {tenant.precio}, Services: {tenant.servicios}")
         return super().form_valid(form)
 
 class Recibos_UpdateSuccessView(LoginRequiredMixin, EnvContextMixin, TemplateView):
@@ -145,6 +218,8 @@ class Recibos_AddTenantView(LoginRequiredMixin, EnvContextMixin, CreateView):
         tenant.servicios = tenant.servicios.lower()
         tenant.precio = "{:,.2f}".format(float(tenant.precio.replace(',', '')))
         tenant.save()
+        logger.info(f"✓ New tenant created successfully: {tenant.name}")
+        logger.debug(f"  - Local: {tenant.local}, Price: {tenant.precio}, Services: {tenant.servicios}")
         return super().form_valid(form)
 
 class Recibos_DeleteTenantView(LoginRequiredMixin, EnvContextMixin, DeleteView):
@@ -158,24 +233,42 @@ class Recibos_DeleteTenantView(LoginRequiredMixin, EnvContextMixin, DeleteView):
 
 
     def get(self, request, *args, **kwargs):
+        logger.info(f"=== Recibos_DeleteTenantView.get() START ===")
         expiring_contracts = []
         contracts = Contract.objects.all()
+        logger.info(f"Checking {contracts.count()} contracts for expiration...")
 
         for contract in contracts:
-            vencimiento = parse_date_string(contract.fecha_vencimiento_contrato)
-            if flag_one_month_to_date(vencimiento, dias):
-                body = f"Hola,\n\nEl siguiente contrato está próximo a vencer en {dias} días:\n\n" \
-                       f"Arrendatario: {contract.nombre_arrendatario}\n" \
-                       f"Vencimiento: {contract.fecha_vencimiento_contrato}\n" \
-                       f"Local: {contract.local}\n" \
-                       f"Monto renta: ${contract.renta} MXN\n\n" \
-                       f"Ver contrato aquí: https://recibos-django.onrender.com/contracts/all-contracts/"
-                send_email(subject="Próximo Vencimiento de Contrato", body=body, to_email=to_email)
+            try:
+                vencimiento = parse_date_string(contract.fecha_vencimiento_contrato)
+                if flag_one_month_to_date(vencimiento, dias):
+                    body = f"Hola,\n\nEl siguiente contrato está próximo a vencer en {dias} días:\n\n" \
+                           f"Arrendatario: {contract.nombre_arrendatario}\n" \
+                           f"Vencimiento: {contract.fecha_vencimiento_contrato}\n" \
+                           f"Local: {contract.local}\n" \
+                           f"Monto renta: ${contract.renta} MXN\n\n" \
+                           f"Ver contrato aquí: https://recibos-django.onrender.com/contracts/all-contracts/"
+                    
+                    logger.warning(f"⚠ Contract expiring soon for {contract.nombre_arrendatario}")
+                    logger.info(f"  - Expiration date: {contract.fecha_vencimiento_contrato}")
+                    logger.info(f"  - Days until expiration: {dias}")
+                    
+                    try:
+                        send_email(subject="Próximo Vencimiento de Contrato", body=body, to_email=to_email)
+                        logger.info(f"✓ Expiration notification email sent to {to_email}")
+                    except Exception as e:
+                        logger.error(f"✗ Failed to send expiration notification email: {str(e)}", exc_info=True)
 
-                expiring_contracts.append({
-                    'nombre_arrendatario': contract.nombre_arrendatario,
-                    'fecha_vencimiento_contrato': contract.fecha_vencimiento_contrato,
-                    'local': contract.local,
-                    'renta': contract.renta,
-                })
+                    expiring_contracts.append({
+                        'nombre_arrendatario': contract.nombre_arrendatario,
+                        'fecha_vencimiento_contrato': contract.fecha_vencimiento_contrato,
+                        'local': contract.local,
+                        'renta': contract.renta,
+                    })
+            except Exception as e:
+                logger.error(f"✗ Error processing contract {contract.id}: {str(e)}", exc_info=True)
+                continue
+        
+        logger.info(f"Found {len(expiring_contracts)} expiring contracts")
+        logger.info(f"=== Recibos_DeleteTenantView.get() END ===")
         return JsonResponse({'expiring_contracts': expiring_contracts}, status=200)
