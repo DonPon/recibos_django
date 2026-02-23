@@ -189,15 +189,14 @@ EMAIL_HOST_PASSWORD = os.getenv('SMTP_PASSWORD')
 
 # Logging Configuration
 import logging
-from datetime import datetime
+from logging.handlers import TimedRotatingFileHandler
 
 # Create logs directory if it doesn't exist
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(LOGS_DIR, exist_ok=True)
 
-# Generate log filename with human-readable timestamp
-log_timestamp = datetime.now().strftime('%d-%b-%Y')
-log_filename = os.path.join(LOGS_DIR, f'recibos_django_{log_timestamp}.log')
+# Use a base filename; handler will rotate automatically
+LOG_FILENAME = os.path.join(LOGS_DIR, 'recibos_django.log')
 
 LOGGING = {
     'version': 1,
@@ -216,8 +215,10 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': log_filename,
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': LOG_FILENAME,
+            'when': 'midnight',           # rotate at midnight each day
+            'backupCount': 7,             # keep one week of logs
             'formatter': 'verbose',
         },
         'console': {
