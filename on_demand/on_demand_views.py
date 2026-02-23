@@ -1,6 +1,7 @@
 # on_demand/views.py
 import time
 import datetime
+import logging
 
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,6 +14,9 @@ from src.src_dates import parse_date_string
 
 from recibos_django.mixins import EnvContextMixin, to_email, dias
 
+# get a logger; using the 'recibos' name will write to the same handlers
+logger = logging.getLogger('recibos')
+
 
 
 # ----------------------------------- RECIBO ON DEMAND (1 SOLA VEZ) ---------------------------------------------
@@ -23,10 +27,13 @@ class OnDemand_GenerateReciboView(LoginRequiredMixin, EnvContextMixin, FormView)
     success_url = reverse_lazy('recibos:pdf_generated')
 
     def post(self, request, *args, **kwargs):
+        logger.debug("OnDemand_GenerateReciboView.post called for user %s", request.user)
         form = self.get_form()
         if form.is_valid():
+            logger.debug("Recibo form valid: %r", form.cleaned_data)
             return self.form_valid(form)
         else:
+            logger.warning("Recibo form invalid: %s", form.errors)
             return self.form_invalid(form)
 
     def form_valid(self, form):
@@ -50,9 +57,13 @@ class OnDemand_GenerateReciboView(LoginRequiredMixin, EnvContextMixin, FormView)
         text = f"Recibí de parte {'del SR.' if titulo == 'SR.' else 'de la SRA.'} {(tenant_name).upper()}, la cantidad de ${precio} ({price_letters.upper()} PESOS 00/100 M.N.), " \
                f"por concepto de {concepto.upper()} del {property_type} {local}, del inmueble ubicado en calle {propiedad}."
 
+        logger.info("generating recibo PDF for %s (%s)", tenant_name, concept)
         file_path = create_recibo_pdf(subject, text, month, tenant_name)
+        logger.debug("PDF created at %s", file_path)
         time.sleep(1)
+        logger.info("sending email to %s", self.request.user.email)
         send_emails_recibos_on_demand(files=[file_path], concepto=concepto, name=tenant_name, to_email=self.request.user.email)
+        logger.debug("email send call completed")
         return super().form_valid(form)
 
 # ------------------------CONVENIO DE TERMINACIÓN Y ENTREGA (1 SOLA VEZ) -----------------------------------------
@@ -63,10 +74,13 @@ class OnDemand_GenerateConvenioTerminacionEntregaView(LoginRequiredMixin, EnvCon
     success_url = reverse_lazy('recibos:pdf_generated')
 
     def post(self, request, *args, **kwargs):
+        logger.debug("OnDemand_GenerateConvenioTerminacionEntregaView.post called for user %s", request.user)
         form = self.get_form()
         if form.is_valid():
+            logger.debug("Convenio form valid: %r", form.cleaned_data)
             return self.form_valid(form)
         else:
+            logger.warning("Convenio form invalid: %s", form.errors)
             return self.form_invalid(form)
 
     def form_valid(self, form):
@@ -103,7 +117,11 @@ class OnDemand_GenerateConvenioTerminacionEntregaView(LoginRequiredMixin, EnvCon
             'terminacion_contrato': terminacion_contrato,
         }
 
+        logger.info("creating convenio PDF for %s", tenant_name)
         file_path = create_terminacion_entrega_pdf(item_dict)
+        logger.debug("convenio PDF generated: %s", file_path)
         time.sleep(1)
+        logger.info("sending convenio email to %s", self.request.user.email)
         send_emails_recibos_on_demand(files=[file_path], concepto='Convenio_Terminacion_Entrega', name=tenant_name, to_email=self.request.user.email)
+        logger.debug("convenio email send call completed")
         return super().form_valid(form)
