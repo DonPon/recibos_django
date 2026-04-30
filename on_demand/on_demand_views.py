@@ -57,7 +57,7 @@ class OnDemand_GenerateReciboView(LoginRequiredMixin, EnvContextMixin, FormView)
         text = f"Recibí de parte {'del SR.' if titulo == 'SR.' else 'de la SRA.'} {(tenant_name).upper()}, la cantidad de ${precio} ({price_letters.upper()} PESOS 00/100 M.N.), " \
                f"por concepto de {concepto.upper()} del {property_type} {local}, del inmueble ubicado en calle {propiedad}."
 
-        logger.info("generating recibo PDF for %s (%s)", tenant_name, concept)
+        logger.info("generating recibo PDF for %s (%s)", tenant_name, concepto)
         file_path = create_recibo_pdf(subject, text, month, tenant_name)
         logger.debug("PDF created at %s", file_path)
         time.sleep(1)

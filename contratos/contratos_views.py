@@ -74,6 +74,9 @@ class Contratos_UpdateContractView(LoginRequiredMixin, EnvContextMixin, UpdateVi
         contract.save()
         return super().form_valid(form)
 
+class Contratos_UpdateSuccessView(LoginRequiredMixin, EnvContextMixin, TemplateView):
+    template_name = 'contratos/update_success.html'
+
 class Contratos_AddContractView(LoginRequiredMixin, EnvContextMixin, CreateView):
     model = Contract
     #form_class = ContractForm
