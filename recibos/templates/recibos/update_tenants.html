@@ -1,106 +1,77 @@
-<!-- update_tenants.html -->
 {% extends 'base.html' %}
 
-{% block title %}Generador de Recibos{% endblock %}
+{% block title %}Inquilinos - Recibos App{% endblock %}
 
 {% block header %}
-    <!-- Additional header content specific to generate_pdfs.html can be added here if needed -->
-    <h1>Mis Inquilinos</h1>
+    <h1 class="display-5 fw-bold mb-0">Mis Inquilinos</h1>
+    <p class="lead opacity-75">Administra los datos de tus arrendatarios</p>
 {% endblock %}
 
 {% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Atrás
+            </a>
+        </div>
+        <div>
+            <a href="{% url 'recibos:add_tenant' %}" class="btn btn-success px-4 shadow-sm">
+                <i class="bi bi-person-plus-fill me-2"></i>Nuevo Inquilino
+            </a>
+        </div>
+    </div>
+</div>
 
-    <style>
-        body {
-            
-        }
-        .container {
-            margin-top: 0px;
-            margin-bottom: 100px;
-        }
-        .card {
-            width: 100%;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 16px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-            transition: transform 0.2s;
-            border: 1px solid #9ea3a5; /* Subtle border color */
-            border-radius: 8px;
-        }
-        .card:hover {
-            transform: scale(1.02);
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-        .card-body h6 {
-
-            color:  #686d6e;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            font-size: 16px;
-            color: #455a64; /* Dark gray text color */
-        }
-        input {
-            width: 100%;
-            font-size: 16px;
-        }
-        .btn {
-            font-size: 14px;
-            border-radius: 5px;
-            margin-top: 10px; /* Adjusted margin for better spacing */
-        }
-        /* Increase the contrast of secondary button */
-        .btn-secondary {
-            background-color: #546e7a; /* Slightly darker teal */
-            border-color: #546e7a;
-            color: #fff; /* White text color */
-            margin-top: 10px; /* Adjusted margin for better spacing */
-        }
-    </style>
-</head>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css">
-<body>
-    <div class="container">
-        En esta sección podrás editar tus inquilinos
-                    <!-- Buttons customization -->
-                    <div class="d-flex mt-3">
-                        <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-arrow-left"></i> ← Atrás
-                        </a>
-                        <div class="flex-grow-1 ml-2">
-                            <a href="{% url 'recibos:add_tenant' %}" class="btn btn-success btn-block">
-                                &#43;  Nuevo Inquilino
-                            </a>
-                        </div>
-                    </div>
-                    <br>
-        {% for tenant in tenants %}
-            <div class="card">
-                <div class="card-header">
-                    {{ tenant.name }}
+<div class="row">
+    {% for tenant in tenants %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card card-custom h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>{{ tenant.name }}</span>
+                <span class="badge bg-light text-dark border">{{ tenant.local }}</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <p class="mb-1 text-muted small text-uppercase fw-bold">Renta Mensual</p>
+                    <h4 class="text-primary mb-0">${{ tenant.precio }} <small class="fs-6 text-muted">MXN</small></h4>
                 </div>
-                <div class="card-body">
-                    <h6>
-                        <span class="bold-label">Monto:</span> ${{ tenant.precio }} MXN
-                    </h6>
-                    <div class="row">
-                        <div class="col-md-6"></div>
-                        <div class="col-md-6">
-                            <a href="{% url 'recibos:update_tenant' tenant_name=tenant.name %}" class="btn btn-primary btn-block">Editar</a>
-                            <a href="{% url 'recibos:delete_tenant' tenant_name=tenant.name %}" class="btn btn-outline-danger btn-block mt-2">Borrar</a>
-                        </div>
+                <div class="mb-3">
+                    <p class="mb-1 text-muted small text-uppercase fw-bold">Servicios</p>
+                    <p class="mb-0 text-dark">{{ tenant.servicios|truncatechars:60|default:"N/A" }}</p>
+                </div>
+                <div class="row g-2 mt-2">
+                    <div class="col-6">
+                        <a href="{% url 'recibos:update_tenant' tenant_name=tenant.name %}" class="btn btn-primary w-100">
+                            <i class="bi bi-pencil me-1"></i>Editar
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-outline-danger w-100" 
+                                hx-get="{% url 'recibos:delete_tenant' tenant_name=tenant.name %}"
+                                hx-target="#modals-here"
+                                hx-trigger="click"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal">
+                            <i class="bi bi-trash me-1"></i>Borrar
+                        </button>
                     </div>
                 </div>
             </div>
-        {% endfor %}
-
-        <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-secondary btn-block mt-3">← Atrás</a>
+        </div>
     </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center py-5 shadow-sm">
+            <i class="bi bi-people fs-1 d-block mb-3 opacity-50"></i>
+            <h4>No hay inquilinos registrados</h4>
+            <p>Comienza agregando uno nuevo con el botón de arriba.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
-</body>
-</html>
+<!-- Placeholder for HTMX Modals -->
+<div id="modals-here"></div>
+
 {% endblock %}

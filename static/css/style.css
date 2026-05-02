@@ -1,0 +1,129 @@
+:root {
+    --primary-gradient: linear-gradient(135deg, #6f25e6 0%, #2962ff 100%);
+    --header-gradient: linear-gradient(to right, #815ee0, #d6659e);
+    --sidebar-bg: #f8f9fa;
+    --card-shadow: 0 10px 16px rgba(0, 0, 0, 0.1);
+    --transition-speed: 0.3s;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    overflow-x: hidden;
+}
+
+/* Sidebar Styling */
+#sidebar-wrapper {
+    min-height: 100vh;
+    margin-left: -15rem;
+    transition: margin var(--transition-speed) ease-out;
+    background: var(--sidebar-bg);
+    border-right: 1px solid #dee2e6;
+    z-index: 1000;
+}
+
+#sidebar-wrapper .sidebar-heading {
+    padding: 1.5rem 1.25rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: var(--header-gradient);
+    color: white;
+}
+
+#sidebar-wrapper .list-group {
+    width: 15rem;
+}
+
+#page-content-wrapper {
+    min-width: 100vw;
+    transition: margin var(--transition-speed) ease-out;
+}
+
+body.sb-sidenav-toggled #sidebar-wrapper {
+    margin-left: 0;
+}
+
+@media (min-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: 0;
+    }
+
+    #page-content-wrapper {
+        min-width: 0;
+        width: 100%;
+    }
+
+    body.sb-sidenav-toggled #sidebar-wrapper {
+        margin-left: -15rem;
+    }
+}
+
+/* Z-Fold Optimization */
+/* Narrow screen (outer) */
+@media (max-width: 600px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Unfolded screen (inner) */
+@media (min-width: 601px) and (max-width: 900px) and (aspect-ratio: 6/5), 
+       (min-width: 601px) and (max-width: 900px) and (aspect-ratio: 2160/1856) {
+    /* Z-Fold inner screen specific adjustments */
+    .container {
+        max-width: 95%;
+    }
+    .card-columns {
+        column-count: 2;
+    }
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-weight: bold;
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+/* Sticky Header/Navbar */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Loader for HTMX */
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 500ms ease-in;
+}
+.htmx-request .htmx-indicator {
+    opacity: 1;
+}
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}

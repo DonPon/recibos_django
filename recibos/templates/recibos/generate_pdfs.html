@@ -1,55 +1,47 @@
-<!-- generate_pdfs.html -->
-
 {% extends 'base.html' %}
 
-{% block title %}Generador de Recibos{% endblock %}
+{% block title %}Inicio - Generador de Recibos{% endblock %}
 
 {% block header %}
-    <!-- Additional header content specific to generate_pdfs.html can be added here if needed -->
-    <h1>Generador de Recibos</h1>
+    <h1 class="display-4 fw-bold">Generador de Recibos</h1>
+    <p class="lead opacity-75">Hola, {{ request.user.username }}</p>
 {% endblock %}
 
 {% block content %}
-<style>
-    .custom-btn {
-        text-decoration: underline;
-        color: blue;
-    }
-    .btn-dark-yellow {
-        background-color: #ec94f8; /* Dark yellow */
-        color: white;
-        border: none;
-    }
-    .btn-dark-yellow:hover {
-        background-color: #bb4096; /* Slightly darker yellow for hover */
-    }
-</style>
+<div class="row justify-content-center mb-4">
+    <div class="col-12 col-lg-8">
+        <div class="card card-custom bg-light border-0">
+            <div class="card-body py-2">
+                <div class="d-flex align-items-center justify-content-center gap-3">
+                    <span class="fw-bold small text-muted text-uppercase">Gestión de Datos:</span>
+                    <a href="{% url 'recibos:update_tenants' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-people me-1"></i>Inquilinos
+                    </a>
+                    <a href="{% url 'contratos:all_contracts' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-file-text me-1"></i>Contratos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div class="container"></style>
-        <div style="text-align: left; color: #343a40; font-size: 16px; margin-bottom: 10px;">
-            Hola, {{ request.user.username }}
-        </div>
-        <div class="line"></div>
-        <div class="btn-group" role="group" aria-label="Navigation Links">
-            <a href="{% url 'recibos:update_tenants' %}" class="btn btn-outline-secondary custom-btn">
-                <i class="bi bi-eye"></i> Editar Inquilinos/Recibos
-            </a>
-            <a href="{% url 'contratos:all_contracts' %}" class="btn btn-outline-secondary custom-btn">
-                <i class="bi bi-eye"></i> Contratos
-            </a>
-        </div>
-        
-        
-        <div class="card shadow-lg">
+<div class="row justify-content-center">
+    <!-- Main PDF Generator -->
+    <div class="col-12 col-lg-6">
+        <div class="card card-custom shadow-lg">
             <div class="card-header">
-                <h5>Generador de Recibos</h5>
+                <i class="bi bi-collection-play-fill text-primary me-2"></i>Generación Mensual
             </div>
             <div class="card-body">
-                <form method="post" action="{% url 'recibos:generate_pdfs' %}">
+                <p class="text-muted mb-4 small text-center">
+                    Selecciona el mes para generar automáticamente todos los recibos y enviarlos.
+                </p>
+                <form method="post" action="{% url 'recibos:generate_pdfs' %}" id="bulk-generate-form">
                     {% csrf_token %}
-                    <div class="form-group">
-                        <label for="monthSelect">Selecciona el mes:</label>
-                        <select class="form-control" id="monthSelect" name="month">
+                    <div class="mb-4">
+                        <label for="monthSelect" class="form-label fw-bold">Mes de Facturación</label>
+                        <select class="form-select form-select-lg" id="monthSelect" name="month">
                             <option value="enero">Enero</option>
                             <option value="febrero">Febrero</option>
                             <option value="marzo">Marzo</option>
@@ -62,31 +54,33 @@
                             <option value="octubre">Octubre</option>
                             <option value="noviembre">Noviembre</option>
                             <option value="diciembre">Diciembre</option>
-                            <!-- ... (other options) -->
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Generar Recibos</button>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        Generar Recibos...
+                    </button>
                 </form>
             </div>
         </div>
-
-        <div class="card shadow-lg mt-4">
-            <div class="card-header">
-                <h5>Generar Otro Recibo Una Sola Vez</h5>
-            </div>
-            <div class="card-body text-center">
-                <a href="{% url 'on_demand:generate_recibo_on_demand' %}" class="btn btn-dark-yellow btn-block" style="color: #343a40;">Generar Recibo Una Sola Vez</a>
-            </div>
-        </div>
-
-        <div class="card shadow-lg mt-4">
-            <div class="card-header">
-                <h5>Terminación y Entrega</h5>
-            </div>
-            <div class="card-body text-center">
-                <a href="{% url 'on_demand:generate_terminacion_entrega_una_sola_vez' %}" class="btn btn-dark-yellow btn-block" style="color: #343a40;">Terminación y Entrega</a>
-            </div>
-        </div>
-
     </div>
+
+    <!-- Quick Actions side by side -->
+    <div class="col-12 col-lg-6">
+        <div class="card card-custom">
+            <div class="card-header">
+                <i class="bi bi-lightning-fill text-warning me-2"></i>Acciones Rápidas
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <a href="{% url 'on_demand:generate_recibo_on_demand' %}" class="btn btn-outline-dark py-3">
+                        <i class="bi bi-file-earmark-plus me-2"></i>Generar Recibo Una Sola Vez
+                    </a>
+                    <a href="{% url 'on_demand:generate_terminacion_entrega_una_sola_vez' %}" class="btn btn-outline-dark py-3">
+                        <i class="bi bi-file-earmark-break me-2"></i>Terminación y Entrega
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

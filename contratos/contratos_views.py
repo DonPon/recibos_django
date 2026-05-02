@@ -123,8 +123,13 @@ class Contratos_AddContractView(LoginRequiredMixin, EnvContextMixin, CreateView)
 class Contratos_DeleteContractView(LoginRequiredMixin, EnvContextMixin, DeleteView):
     model = Contract
     template_name = 'contratos/delete_contract.html'
-    success_url = reverse_lazy('recibos:generate_pdfs')
+    success_url = reverse_lazy('contratos:all_contracts')
     pk_url_kwarg = 'id'
+
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return ['contratos/partials/delete_contract_modal.html']
+        return [self.template_name]
 
 class Contratos_CreateContractPDFView(LoginRequiredMixin, EnvContextMixin, TemplateView):
     template_name = 'contratos/pdf_generated.html'

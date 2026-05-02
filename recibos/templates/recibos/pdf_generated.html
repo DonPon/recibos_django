@@ -1,29 +1,22 @@
-<!-- pdf_generated.html -->
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'base.html' %}
 
-    <title>Recibos generados</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #28a745;
-            color: #000; /* Set the text color to black */
-        }
-        .container {
-            margin-top: 50px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="card">
-            <div class="card-body">
-                <h1 class="card-title">Los recibos para el mes de {{ month }} han sido enviados por correo.</h1>
-                <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-primary">Atras</a>
+{% block title %}PDF Generado - Recibos App{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="col-md-6 text-center">
+        <div class="card shadow-sm border-0 p-5">
+            <div class="mb-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+            </div>
+            <h2 class="fw-bold mb-3">¡PDFs Generados!</h2>
+            <p class="text-muted mb-4 fs-5">Los archivos PDF han sido creados y enviados por correo electrónico exitosamente.</p>
+            <div class="d-grid gap-2">
+                <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-success btn-lg">
+                    OK
+                </a>
             </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

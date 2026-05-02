@@ -1,71 +1,139 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Recibos{% endblock %}</title>
+    <title>{% block title %}Recibos & Contratos{% endblock %}</title>
 
-
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- DataTables CSS (keeping for functionality, but we will use cards too) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh; /* Ensure the body takes up the full height of the viewport */
-            margin: 0;
-        }
         header {
             background: linear-gradient(to right, #815ee0 , #d6659e);
             color: white;
             text-align: center;
-            padding: 1rem;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
         }
-    
-        main {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 1rem;
-            margin-bottom: 60px; /* Adjusted margin to prevent footer from overlapping content */
+        .navbar-brand-custom {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: white !important;
         }
-    
-        .card {
-            width: 100%;
-            margin-bottom: 20px;
+        .main-container {
+            padding-bottom: 80px;
+        }
+        /* Custom card style similar to original but refined */
+        .card-custom {
+            border: 1px solid #9ea3a5;
+            border-radius: 12px;
             box-shadow: 0 14px 18px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
-            border: 1px solid #9ea3a5; /* Subtle border color */
-            border-radius: 8px;
+            margin-bottom: 25px;
+            background: white;
         }
-    
-        .btn-primary {
-            background: linear-gradient(to right, #6f25e6, #2962ff);
-            border-color: #a18dd6;  
-            color: white;
+        .card-custom:hover {
+            transform: scale(1.01);
         }
-    
-        footer {
-            background-color: #f8f9fa; /* Light gray background for the footer */
+        .card-custom .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: bold;
             padding: 1rem;
-            text-align: center;
-            border-top: 1px solid #dee2e6; /* Subtle border at the top of the footer */
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
         }
     </style>
+    
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <header><br>{% block header %}{% endblock %}<br>
+    {% if user.is_authenticated %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'recibos:generate_pdfs' %}">
+                <i class="bi bi-file-earmark-pdf me-2"></i>Recibos App
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'recibos:generate_pdfs' %}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'recibos:update_tenants' %}">Inquilinos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'contratos:all_contracts' %}">Contratos</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <span class="text-light me-3 small d-none d-md-inline">
+                        <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+                    </span>
+                    <form method="post" action="{% url 'admin:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-light btn-sm">Salir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <header>
+        <div class="container">
+            {% block header %}{% endblock %}
+        </div>
     </header>
 
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+    <main class="main-container container">
+        <div id="alert-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
 
-    <footer class="text-center fixed-bottom bg-light py-3">
-        <p><small>{{ ENV }}</small> - {{ current_year }} Franz Eckermann &copy; </p>
+        <div id="content-area">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <footer class="py-3 bg-light border-top text-center fixed-bottom">
+        <p class="mb-0 text-muted small">
+            {{ current_year }} Franz Eckermann &copy; | {{ ENV|default:"DEV" }}
+        </p>
     </footer>
 
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
 
-
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+    </script>
 </body>
 </html>

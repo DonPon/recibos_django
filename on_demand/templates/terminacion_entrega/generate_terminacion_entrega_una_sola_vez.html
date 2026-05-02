@@ -1,58 +1,72 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="container mt-5">
-    <div class="card">
-        <div class="card-header">
-            <h1>Generar Convenio Terminación/Entrega</h1>
-        </div>
-        <div class="card-body">
-            <form method="post" action="{% url 'on_demand:generate_terminacion_entrega_una_sola_vez' %}">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="titulo">Título</label>
-                    <select id="titulo" name="titulo" class="form-control" required>
-                        <option value="SR.">SR.</option>
-                        <option value="SRA.">SRA.</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="name">Nombre del inquilino</label>
-                    <input type="text" id="name" name="name" class="form-control" placeholder="Ingrese el nombre completo del inquilino" required>
-                </div>
-                <div class="form-group">
-                    <label for="propiedad">Propiedad</label>
-                    <select id="propiedad" name="propiedad" class="form-control" required>
-                        <option value="Noche de Paz #14, Colonia Granjas Navidad, Delegación Cuajimalpa, C.P. 05219">
-                            Noche de Paz #14, Colonia Granjas Navidad, Delegación Cuajimalpa, C.P. 05219
-                        </option>
-                        <option value="2do. Retorno de Loma del Recuerdo # 70, Colonia Lomas de Vista Hermosa, Delegación Cuajimalpa, C.P. 05100">
-                            2do. Retorno de Loma del Recuerdo # 70, Colonia Lomas de Vista Hermosa, Delegación Cuajimalpa, C.P. 05100
-                        </option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="local">Local/depto.</label>
-                    <input type="text" id="local" name="local" class="form-control" placeholder="Ej. 5D, C, etc." required>
-                </div>
-                <div class="form-group">
-                    <label for="comienzo_contrato">Fecha de inicio del contrato</label>
-                    <input type="text" id="comienzo_contrato" name="comienzo_contrato" class="form-control" placeholder="Ej. 15/05/2023" required>
-                </div>
-                <div class="form-group">
-                    <label for="terminacion_contrato">Fecha de terminación del contrato</label>
-                    <input type="text" id="terminacion_contrato" name="terminacion_contrato" class="form-control" placeholder="Ej. 14/05/2024" required>
-                </div>
+{% block title %}Terminación - Recibos App{% endblock %}
 
-                <button type="submit" class="btn btn-primary">Generar Convenio</button>
-            </form>
-            <br><div class="d-flex mt-3">
-                <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-arrow-left"></i> ← Atrás
-                </a></div>
+{% block header %}
+    <h1 class="display-5 fw-bold mb-0">Terminación y Entrega</h1>
+    <p class="lead opacity-75">Generar convenio de terminación de contrato</p>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-md-5">
+                <form method="post" action="{% url 'on_demand:generate_terminacion_entrega_una_sola_vez' %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-3 mb-4">
+                            <label for="titulo" class="form-label fw-bold small text-uppercase text-muted">Título</label>
+                            <select id="titulo" name="titulo" class="form-select form-select-lg" required>
+                                <option value="SR.">SR.</option>
+                                <option value="SRA.">SRA.</option>
+                            </select>
+                        </div>
+                        <div class="col-md-9 mb-4">
+                            <label for="name" class="form-label fw-bold small text-uppercase text-muted">Nombre del inquilino</label>
+                            <input type="text" id="name" name="name" class="form-control form-control-lg" placeholder="Nombre completo" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="propiedad" class="form-label fw-bold small text-uppercase text-muted">Propiedad</label>
+                        <select id="propiedad" name="propiedad" class="form-select form-select-lg" required>
+                            <option value="Noche de Paz #14, Colonia Granjas Navidad, Delegación Cuajimalpa, C.P. 05219">
+                                Noche de Paz #14, Colonia Granjas Navidad, Cuajimalpa
+                            </option>
+                            <option value="2do. Retorno de Loma del Recuerdo # 70, Colonia Lomas de Vista Hermosa, Delegación Cuajimalpa, C.P. 05100">
+                                Loma del Recuerdo #70, Lomas de Vista Hermosa
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="local" class="form-label fw-bold small text-uppercase text-muted">Local/depto.</label>
+                        <input type="text" id="local" name="local" class="form-control form-control-lg" placeholder="Ej. 5D, C, etc." required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="comienzo_contrato" class="form-label fw-bold small text-uppercase text-muted">Fecha de inicio</label>
+                            <input type="text" id="comienzo_contrato" name="comienzo_contrato" class="form-control form-control-lg" placeholder="15/05/2023" required>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="terminacion_contrato" class="form-label fw-bold small text-uppercase text-muted">Fecha de terminación</label>
+                            <input type="text" id="terminacion_contrato" name="terminacion_contrato" class="form-control form-control-lg" placeholder="14/05/2024" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-file-earmark-check-fill me-2"></i>Generar Convenio...
+                        </button>
+                        <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-link text-muted">
+                            Volver al inicio
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-    <br><br>
 </div>
-
 {% endblock %}
