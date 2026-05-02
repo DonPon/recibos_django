@@ -1,83 +1,96 @@
-<!-- add_tenant.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuevo Contrato</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Add Bootstrap CDN links here if not included in your project -->
-    <!-- For example: -->
-    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
-    <style>
-        body {
-            background-color: #edeef0; /* Light grayish-blue background */
-        }
-        .container {
-            margin-top: 20px;
-            margin-bottom: 100px;
-        }
-        .card {
-            width: 100%;
-            margin: auto;
-            
-        }
-        .card-header {
-            background: linear-gradient(to right, #815ee0 , #d6659e);
-            color: #fff;
-            font-size: 18px;
-        }
-        .card-body {
-            background-color: #fff; /* White card body */
-            padding: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            font-size: 16px;
-        }
-        input {
-            width: 100%;
-            font-size: 16px;
-        }
-        .btn-primary {
-            font-size: 16px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="card shadow-lg">
-            <div class="card-header">
-                <h3 class="card-title">Nuevo Contrato</h3>
-            </div>
-            <div class="card-body">
+{% extends 'base.html' %}
 
+{% block title %}Nuevo Contrato - Recibos App{% endblock %}
+
+{% block header %}
+    <h1 class="display-5 fw-bold mb-0">Nuevo Contrato</h1>
+    <p class="lead opacity-75">Crea un nuevo contrato de arrendamiento</p>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-md-5">
+                
                 {% if not contract_type %}
-                <div id="contract-selection">
-                    <h2>Seleccione el tipo de contrato:</h2>
-                    <form method="get" action="">
-                        <button type="submit" name="contract_type" value="local_comercial" class="btn btn-primary btn-block">Local Comercial</button>
-                        <button type="submit" name="contract_type" value="departamento" class="btn btn-primary btn-block">Departamento</button>
-                    </form>
+                <div id="contract-selection" class="text-center py-5">
+                    <h2 class="mb-5">¿Qué tipo de contrato desea crear?</h2>
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-md-5">
+                            <form method="get" action="">
+                                <button type="submit" name="contract_type" value="local_comercial" class="btn btn-outline-primary btn-lg w-100 py-4">
+                                    <i class="bi bi-shop fs-1 d-block mb-3"></i>
+                                    Local Comercial
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-5">
+                            <form method="get" action="">
+                                <button type="submit" name="contract_type" value="departamento" class="btn btn-outline-primary btn-lg w-100 py-4">
+                                    <i class="bi bi-building fs-1 d-block mb-3"></i>
+                                    Departamento
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 {% endif %}
 
                 {% if contract_type %}
-                <form method="post" action="{% url 'contratos:add_contract' %}">
+                <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
+                    <i class="bi {% if contract_type == 'local_comercial' %}bi-shop{% else %}bi-building{% endif %} fs-4 me-2 text-primary"></i>
+                    <h5 class="mb-0 text-muted">Contrato: <span class="text-dark fw-bold">{{ contract_type|title }}</span></h5>
+                </div>
+
+                <form method="post" action="{% url 'contratos:add_contract' %}?contract_type={{ contract_type }}" class="needs-validation">
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-success btn-block">Guardar</button>
+                    <div class="row">
+                        {% for field in form %}
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-bold small text-uppercase text-muted">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text small">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-grid gap-2 mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle-fill me-2"></i>Generar y Guardar Contrato
+                        </button>
+                        <a href="{% url 'contratos:all_contracts' %}" class="btn btn-link text-muted">
+                            Cancelar y volver
+                        </a>
+                    </div>
                 </form>
+                {% else %}
+                <div class="text-center mt-4">
+                    <a href="{% url 'contratos:all_contracts' %}" class="btn btn-link text-muted">
+                        Cancelar y volver
+                    </a>
+                </div>
                 {% endif %}
-                <br>
-                <a href="{% url 'contratos:all_contracts' %}" class="btn btn-secondary btn-block">← Cancelar</a>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-</body>
-</html>
-
-
+{% block extra_js %}
+<script>
+    // Add Bootstrap form styling to django-generated inputs
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+        el.classList.add('form-control');
+    });
+</script>
+{% endblock %}

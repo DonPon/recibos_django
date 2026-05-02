@@ -225,50 +225,13 @@ class Recibos_AddTenantView(LoginRequiredMixin, EnvContextMixin, CreateView):
 class Recibos_DeleteTenantView(LoginRequiredMixin, EnvContextMixin, DeleteView):
     model = Tenant
     template_name = 'recibos/delete_tenant.html'
-    success_url = reverse_lazy('recibos:generate_pdfs')
-    slug_field = 'name'  # Specify the model field to use for lookup
-    slug_url_kwarg = 'tenant_name'  # Match this to the URL parameter
+    success_url = reverse_lazy('recibos:update_tenants')
+    slug_field = 'name'
+    slug_url_kwarg = 'tenant_name'
     context_object_name = 'tenant'
 
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return ['recibos/partials/delete_tenant_modal.html']
+        return [self.template_name]
 
-
-    def get(self, request, *args, **kwargs):
-        logger.info(f"=== Recibos_DeleteTenantView.get() START ===")
-        expiring_contracts = []
-        contracts = Contract.objects.all()
-        logger.info(f"Checking {contracts.count()} contracts for expiration...")
-
-        for contract in contracts:
-            try:
-                vencimiento = parse_date_string(contract.fecha_vencimiento_contrato)
-                if flag_one_month_to_date(vencimiento, dias):
-                    body = f"Hola,\n\nEl siguiente contrato está próximo a vencer en {dias} días:\n\n" \
-                           f"Arrendatario: {contract.nombre_arrendatario}\n" \
-                           f"Vencimiento: {contract.fecha_vencimiento_contrato}\n" \
-                           f"Local: {contract.local}\n" \
-                           f"Monto renta: ${contract.renta} MXN\n\n" \
-                           f"Ver contrato aquí: https://recibos-django.onrender.com/contracts/all-contracts/"
-                    
-                    logger.warning(f"⚠ Contract expiring soon for {contract.nombre_arrendatario}")
-                    logger.info(f"  - Expiration date: {contract.fecha_vencimiento_contrato}")
-                    logger.info(f"  - Days until expiration: {dias}")
-                    
-                    try:
-                        send_email(subject="Próximo Vencimiento de Contrato", body=body, to_email=to_email)
-                        logger.info(f"✓ Expiration notification email sent to {to_email}")
-                    except Exception as e:
-                        logger.error(f"✗ Failed to send expiration notification email: {str(e)}", exc_info=True)
-
-                    expiring_contracts.append({
-                        'nombre_arrendatario': contract.nombre_arrendatario,
-                        'fecha_vencimiento_contrato': contract.fecha_vencimiento_contrato,
-                        'local': contract.local,
-                        'renta': contract.renta,
-                    })
-            except Exception as e:
-                logger.error(f"✗ Error processing contract {contract.id}: {str(e)}", exc_info=True)
-                continue
-        
-        logger.info(f"Found {len(expiring_contracts)} expiring contracts")
-        logger.info(f"=== Recibos_DeleteTenantView.get() END ===")
-        return JsonResponse({'expiring_contracts': expiring_contracts}, status=200)

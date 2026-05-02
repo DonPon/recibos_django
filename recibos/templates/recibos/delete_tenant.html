@@ -1,51 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Borrar Inquilino</title>
-    <!-- Add Bootstrap CDN links here if not included in your project -->
-    <!-- For example: -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        h2 {
-            color: #dc3545;
-        }
-        p {
-            margin-bottom: 20px;
-        }
-        button {
-            margin-top: 10px;
-        }
-        .btn-secondary {
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Eliminar Inquilino</h2>
-        <p>Estas seguro que deseas eliminar inquilino <strong>{{ tenant.name }}</strong>?</p>
-        <form method="post" action="{% url 'recibos:delete_tenant' tenant.name %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Eliminar</button>
-        </form>
-        <a href="{% url 'recibos:generate_pdfs' %}" class="btn btn-secondary">Cancelar</a>
+{% extends 'base.html' %}
+
+{% block title %}Borrar Inquilino - Recibos App{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <div class="card shadow-sm border-0 p-5">
+            <div class="mb-4">
+                <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 5rem;"></i>
+            </div>
+            <h2 class="fw-bold mb-3 text-danger">Eliminar Inquilino</h2>
+            <p class="fs-5 mb-1">¿Estás seguro de que deseas eliminar a:</p>
+            <h4 class="fw-bold mb-4">{{ tenant.name }}</h4>
+            <div class="d-grid gap-2">
+                <form method="post" action="{% url 'recibos:delete_tenant' tenant_name=tenant.name %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-lg w-100">Eliminar Definitivamente</button>
+                </form>
+                <a href="{% url 'recibos:update_tenants' %}" class="btn btn-link text-muted">
+                    Cancelar y volver
+                </a>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
