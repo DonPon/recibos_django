@@ -10,21 +10,24 @@ ENV = os.getenv('ENV')
 # to_email = os.getenv('TO_EMAIL')
 from_email = os.getenv('FROM_EMAIL')
 
-# Get admin email for CC
-try:
-    admin_user = User.objects.get(username='admin')
-    admin_email = admin_user.email
-except User.DoesNotExist:
-    admin_email = None
-    logger.warning("Admin user not found - CC email will not be used")
+# Configure logger
+logger = logging.getLogger('src')
 
 smtp_password = os.getenv('SMTP_PASSWORD')
 smtp_server = 'smtp.gmail.com'
 smtp_port = 587
 smtp_username = from_email
 
-# Configure logger
-logger = logging.getLogger('src')
+
+def _get_admin_email():
+    """Resolve the admin CC address lazily (the DB may not exist during migrate/checks)."""
+    try:
+        return User.objects.get(username='admin').email
+    except User.DoesNotExist:
+        logger.warning("Admin user not found - CC email will not be used")
+    except Exception as exc:
+        logger.warning("Could not look up admin user for CC: %s", exc)
+    return None
 
 
 def send_email(subject, body, to_email, file_paths=None, is_html=False, cc_enabled=True):
@@ -46,6 +49,7 @@ def send_email(subject, body, to_email, file_paths=None, is_html=False, cc_enabl
     Returns:
         None
     """
+    admin_email = _get_admin_email() if cc_enabled else None
     logger.info(f"=== send_email() START ===")
     logger.info(f"Email subject: {subject}")
     logger.info(f"Recipient (to_email): {to_email}")

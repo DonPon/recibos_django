@@ -15,9 +15,6 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-print(os.getenv('DATABASE_URL'))
-
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 #BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +37,11 @@ except:
     DEBUG = False
 
 ALLOWED_HOSTS = ['*']
+
+# Served behind nginx at https://server84.vps.webdock.cloud/recibos/
+FORCE_SCRIPT_NAME = '/recibos'
+CSRF_TRUSTED_ORIGINS = ['https://server84.vps.webdock.cloud']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -155,9 +157,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/recibos/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = '/var/www/recibos-static'
 
 #MEDIA_ROOT = os.path.join(BASE_DIR, 'tmp')
 MEDIA_URL = '/media/'
@@ -178,7 +180,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_AGE = 1800
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/recibos/login/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
